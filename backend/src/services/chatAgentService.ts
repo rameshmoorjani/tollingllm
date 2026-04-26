@@ -1,5 +1,5 @@
 import { MongoDBService } from './mongodbService';
-import { SageMakerService } from './sagemakerService';
+import { BedrockService } from './bedrockService';
 
 interface Transaction {
   customer_id: string;
@@ -12,11 +12,11 @@ interface Transaction {
 
 export class ChatAgentService {
   private mongoService: MongoDBService;
-  private sagemakerService: SageMakerService;
+  private bedrockService: BedrockService;
 
   constructor() {
     this.mongoService = new MongoDBService();
-    this.sagemakerService = new SageMakerService();
+    this.bedrockService = new BedrockService();
   }
 
   async processQuery(
@@ -45,16 +45,16 @@ export class ChatAgentService {
       // Generate prompt for SageMaker
       const prompt = this.generatePrompt(customerId, transactions, query, isAllCustomers);
 
-      // Call SageMaker
+      // Call Bedrock
       let response: string;
       if (onChunk) {
-        const result = await this.sagemakerService.streamInvoke(
+        const result = await this.bedrockService.streamInvoke(
           { prompt },
           onChunk
         );
         response = result.message;
       } else {
-        const result = await this.sagemakerService.invoke({ prompt });
+        const result = await this.bedrockService.invoke({ prompt });
         response = result.message;
       }
 

@@ -21,22 +21,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Ollama LLM Service
-  ollama:
-    image: ollama/ollama:latest
-    container_name: tolling-llm-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama_data:/root/.ollama
-    networks:
-      - tolling-llm-network
-    environment:
-      OLLAMA_HOST: 0.0.0.0:11434
-      OLLAMA_MODEL: mistral
-    # Use default serve command - model pulling happens separately
-    entrypoint: /bin/sh -c "ollama serve"
-
   # Backend API
   backend:
     build:
@@ -48,8 +32,10 @@ services:
       MONGODB_URI: mongodb://admin:password@mongodb:27017/tolling_db?authSource=admin
       MONGODB_DATABASE: tolling_db
       MONGODB_COLLECTION: transactions
-      OLLAMA_HOST: http://ollama:11434
-      OLLAMA_MODEL: mistral
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      BEDROCK_MODEL: ${BEDROCK_MODEL:-meta.llama3-8b-instruct-v1:0}
       API_PORT: 5000
       FRONTEND_URL: http://localhost:3000
     ports:
@@ -57,8 +43,6 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
-      ollama:
-        condition: service_started
     networks:
       - tolling-llm-network
     restart: unless-stopped
@@ -85,7 +69,5 @@ networks:
 
 volumes:
   mongodb_data:
-    driver: local
-  ollama_data:
     driver: local
 
