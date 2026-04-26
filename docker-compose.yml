@@ -33,7 +33,7 @@ services:
       - tolling-llm-network
     environment:
       OLLAMA_HOST: 0.0.0.0:11434
-      OLLAMA_MODEL: phi
+      OLLAMA_MODEL: mistral
     # Use default serve command - model pulling happens separately
     entrypoint: /bin/sh -c "ollama serve"
 
@@ -49,7 +49,7 @@ services:
       MONGODB_DATABASE: tolling_db
       MONGODB_COLLECTION: transactions
       OLLAMA_HOST: http://ollama:11434
-      OLLAMA_MODEL: phi
+      OLLAMA_MODEL: mistral
       API_PORT: 5000
       FRONTEND_URL: http://localhost:3000
     ports:
