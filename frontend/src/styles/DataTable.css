@@ -1,0 +1,80 @@
+.data-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.data-table thead {
+  background-color: #f3f4f6;
+  border-bottom: 2px solid var(--border);
+}
+
+.data-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.data-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background-color 0.2s;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f9fafb;
+}
+
+.data-table td {
+  padding: 1rem;
+}
+
+.amount {
+  font-weight: 600;
+  color: var(--success);
+}
+
+.badge-completed {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #d1fae5;
+  color: #065f46;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge-pending {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #fef3c7;
+  color: #92400e;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.badge-failed {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background-color: #fee2e2;
+  color: #991b1b;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.online,
+.offline {
+  font-weight: 600;
+}
+
+.offline {
+  color: var(--danger);
+}

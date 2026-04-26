@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  # MongoDB Database (Production)
+  mongodb:
+    image: mongo:7.0
+    container_name: tolling-llm-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme}
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE:-tolling_db}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - tolling-llm-network
+    restart: always
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend API (Production)
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: tolling-llm-backend
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: ${MONGODB_URI}
+      MONGODB_DATABASE: ${MONGODB_DATABASE:-tolling_db}
+      MONGODB_COLLECTION: ${MONGODB_COLLECTION:-transactions}
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral}
+      API_PORT: 5000
+      FRONTEND_URL: ${FRONTEND_URL}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "5000:5000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - tolling-llm-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend UI (Production)
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: tolling-llm-frontend
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:5000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - tolling-llm-network
+    restart: always
+
+  # Ollama LLM Service (Optional - can run on separate machine)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tolling-llm-ollama
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - tolling-llm-network
+    restart: always
+    # Initialize with model pull (requires internet on first run)
+    # Remove or customize based on your needs
+    command: sh -c "ollama serve & sleep 2 && ollama pull ${OLLAMA_MODEL:-mistral} && wait"
+
+networks:
+  tolling-llm-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  ollama_data:
+    driver: local

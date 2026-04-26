@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: tolling-llm-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: tolling_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - tolling-llm-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Ollama LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tolling-llm-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - tolling-llm-network
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+      OLLAMA_MODEL: phi
+    # Use default serve command - model pulling happens separately
+    entrypoint: /bin/sh -c "ollama serve"
+
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    container_name: tolling-llm-backend
+    environment:
+      NODE_ENV: development
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/tolling_db?authSource=admin
+      MONGODB_DATABASE: tolling_db
+      MONGODB_COLLECTION: transactions
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: phi
+      API_PORT: 5000
+      FRONTEND_URL: http://localhost:3000
+    ports:
+      - "5000:5000"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - tolling-llm-network
+    restart: unless-stopped
+
+  # Frontend UI
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    container_name: tolling-llm-frontend
+    environment:
+      VITE_API_BASE_URL: http://localhost:5000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - tolling-llm-network
+    restart: unless-stopped
+
+networks:
+  tolling-llm-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+    driver: local
+  ollama_data:
+    driver: local
+

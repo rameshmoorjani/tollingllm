@@ -1,0 +1,12 @@
+{
+  "ModelName": "flan-t5-xl-model",
+  "PrimaryContainer": {
+    "Image": "382416733822.dkr.ecr.us-east-1.amazonaws.com/huggingface-text2text:latest",
+    "ModelDataUrl": "s3://jumpstart-cache-prod-us-east-1/huggingface-text2text/huggingface-text2text-flan-t5-xl-hf.tar.gz",
+    "Environment": {
+      "HF_MODEL_ID": "google/flan-t5-xl",
+      "HF_TASK": "text2text-generation"
+    }
+  },
+  "ExecutionRoleArn": "arn:aws:iam::ACCOUNT_ID:role/SageMakerRole"
+}

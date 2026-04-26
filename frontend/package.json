@@ -1,0 +1,32 @@
+{
+  "name": "tolling-llm-frontend",
+  "version": "1.0.0",
+  "description": "React + TypeScript frontend for TollingLLM",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src/**/*.{ts,tsx}",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\""
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "socket.io-client": "^4.7.2",
+    "axios": "^1.6.0",
+    "date-fns": "^2.30.0",
+    "react-router-dom": "^6.20.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@vitejs/plugin-react": "^4.2.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.0"
+  }
+}

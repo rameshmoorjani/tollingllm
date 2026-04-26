@@ -1,0 +1,144 @@
+import { MongoClient, Db, Collection, ObjectId } from 'mongodb';
+
+interface Transaction {
+  _id?: ObjectId;
+  customer_id: string;
+  tolltime: Date;
+  tollstatus: string;
+  toll_point_name: string;
+  toll_amount: number;
+  timezone: string;
+  state: string;
+  connection_status: boolean;
+  created_at?: Date;
+}
+
+export class MongoDBService {
+  private client: MongoClient | null = null;
+  private db: Db | null = null;
+  private collection: Collection<Transaction> | null = null;
+
+  async connect(): Promise<void> {
+    if (this.client) return;
+
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+    const dbName = process.env.MONGODB_DATABASE || 'tolling_db';
+    const collectionName = process.env.MONGODB_COLLECTION || 'transactions';
+
+    this.client = new MongoClient(mongoUri);
+    await this.client.connect();
+
+    this.db = this.client.db(dbName);
+    this.collection = this.db.collection<Transaction>(collectionName);
+
+    console.log('✅ Connected to MongoDB');
+  }
+
+  async disconnect(): Promise<void> {
+    if (this.client) {
+      await this.client.close();
+      this.client = null;
+      this.db = null;
+      this.collection = null;
+      console.log('❌ Disconnected from MongoDB');
+    }
+  }
+
+  async getTransactions(
+    filter: any = {},
+    skip: number = 0,
+    limit: number = 20
+  ): Promise<Transaction[]> {
+    await this.connect();
+    return this.collection!.find(filter).skip(skip).limit(limit).toArray();
+  }
+
+  async countTransactions(filter: any = {}): Promise<number> {
+    await this.connect();
+    return this.collection!.countDocuments(filter);
+  }
+
+  async getTransactionById(id: string): Promise<Transaction | null> {
+    await this.connect();
+    return this.collection!.findOne({ _id: new ObjectId(id) });
+  }
+
+  async searchTransactions(query: string): Promise<Transaction[]> {
+    await this.connect();
+    return this.collection!
+      .find({
+        $or: [
+          { toll_point_name: { $regex: query, $options: 'i' } },
+          { customer_id: { $regex: query, $options: 'i' } },
+          { state: { $regex: query, $options: 'i' } },
+        ],
+      })
+      .limit(50)
+      .toArray();
+  }
+
+  async getCustomerTransactions(customerId: string): Promise<Transaction[]> {
+    await this.connect();
+    return this.collection!.find({ customer_id: customerId }).toArray();
+  }
+
+  async getAllTransactions(): Promise<Transaction[]> {
+    await this.connect();
+    return this.collection!.find({}).toArray();
+  }
+
+  async getMaxTollTransaction(): Promise<any> {
+    await this.connect();
+    const result = await this.collection!
+      .find({})
+      .sort({ toll_amount: -1 })
+      .limit(1)
+      .toArray();
+    return result[0] || null;
+  }
+
+  async getTopCustomers(limit: number = 10): Promise<any[]> {
+    await this.connect();
+    return this.collection!
+      .aggregate([
+        {
+          $group: {
+            _id: '$customer_id',
+            total_amount: { $sum: '$toll_amount' },
+            transaction_count: { $sum: 1 },
+            max_toll: { $max: '$toll_amount' },
+            min_toll: { $min: '$toll_amount' },
+            avg_toll: { $avg: '$toll_amount' },
+          },
+        },
+        { $sort: { total_amount: -1 } },
+        { $limit: limit },
+      ])
+      .toArray();
+  }
+
+  async getCustomerStats(): Promise<any[]> {
+    await this.connect();
+    return this.collection!
+      .aggregate([
+        {
+          $group: {
+            _id: '$customer_id',
+            total_amount: { $sum: '$toll_amount' },
+            transaction_count: { $sum: 1 },
+            max_toll: { $max: '$toll_amount' },
+            min_toll: { $min: '$toll_amount' },
+            avg_toll: { $avg: '$toll_amount' },
+            locations: { $push: '$toll_point_name' },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ])
+      .toArray();
+  }
+
+  async insertTransactions(transactions: any[]): Promise<any> {
+    await this.connect();
+    return this.collection!.insertMany(transactions);
+  }
+}

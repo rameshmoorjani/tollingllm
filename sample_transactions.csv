@@ -1,0 +1,406 @@
+Customer ID,Toll Time,Toll Status,Toll Point,Amount,Timezone,State,Connection Status
+CUST001,2026-04-01 08:15:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-01 17:45:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-02 07:30:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-02 18:15:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-03 08:00:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-03 17:50:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-04 07:45:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-04 18:20:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-05 08:30:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-05 17:30:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-08 07:15:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-08 18:00:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-09 08:45:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-09 17:40:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-10 07:50:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-10 18:10:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-11 08:20:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-11 17:55:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-12 07:30:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-12 18:30:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-15 08:00:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-15 17:45:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-16 08:15:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-16 18:00:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-17 07:40:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-17 17:50:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-18 08:25:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-18 18:15:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-19 07:55:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-19 17:35:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-22 08:10:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-22 18:20:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-23 07:45:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-23 17:40:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-24 08:30:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-24 18:10:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-25 07:50:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-25 18:00:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST001,2026-04-26 08:15:00,completed,I-95 North Toll,3.50,EST,FL,connected
+CUST001,2026-04-26 17:45:00,completed,I-95 South Toll,3.50,EST,FL,connected
+CUST002,2026-04-01 09:00:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-01 16:30:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-02 08:45:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-02 16:15:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-03 09:20:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-03 17:00:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-04 08:30:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-04 16:45:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-05 09:15:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-05 16:40:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-08 08:50:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-08 17:20:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-09 09:10:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-09 16:50:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-10 08:40:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-10 17:10:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-11 09:00:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-11 16:35:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-12 08:55:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-12 17:05:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-15 09:25:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-15 16:45:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-16 08:50:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-16 17:15:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-17 09:10:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-17 16:50:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-18 08:45:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-18 17:00:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-19 09:20:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-19 16:55:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-22 08:55:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-22 17:25:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-23 09:10:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-23 16:40:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-24 08:50:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-24 17:20:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-25 09:15:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-25 16:45:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-26 08:40:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST002,2026-04-26 17:15:00,completed,Florida Turnpike,2.75,EST,FL,connected
+CUST003,2026-04-01 07:30:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-01 19:00:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-02 07:45:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-02 18:45:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-03 07:15:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-03 19:15:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-04 07:50:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-04 19:20:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-05 07:40:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-05 18:50:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-08 07:35:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-08 19:10:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-09 07:55:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-09 19:00:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-10 07:20:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-10 18:40:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-11 07:45:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-11 19:25:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-12 07:50:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-12 18:55:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-15 07:30:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-15 19:10:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-16 07:40:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-16 19:00:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-17 07:55:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-17 19:15:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-18 07:35:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-18 18:45:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-19 07:50:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-19 19:20:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-22 07:25:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-22 19:05:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-23 07:45:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-23 18:50:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-24 07:50:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-24 19:10:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-25 07:35:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-25 18:55:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST003,2026-04-26 07:55:00,completed,NJ Turnpike Exit 9,4.00,EST,NJ,connected
+CUST003,2026-04-26 19:00:00,completed,NJ Turnpike Exit 14,4.00,EST,NJ,connected
+CUST004,2026-04-01 06:45:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-01 18:30:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-02 06:50:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-02 18:45:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-03 07:00:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-03 18:15:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-04 06:55:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-04 18:40:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-05 07:10:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-05 18:20:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-08 06:45:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-08 18:35:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-09 07:00:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-09 18:50:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-10 06:50:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-10 18:30:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-11 07:05:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-11 18:25:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-12 06:55:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-12 18:40:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-15 07:10:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-15 18:35:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-16 06:45:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-16 18:50:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-17 07:00:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-17 18:30:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-18 06:50:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-18 18:45:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-19 07:05:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-19 18:20:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-22 06:55:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-22 18:40:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-23 07:10:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-23 18:25:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-24 06:45:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-24 18:50:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-25 07:00:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-25 18:30:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-26 06:50:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST004,2026-04-26 18:45:00,completed,Bay Bridge Toll,6.00,PST,CA,connected
+CUST005,2026-04-01 08:00:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-01 17:15:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-02 08:20:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-02 17:40:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-03 07:50:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-03 17:30:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-04 08:10:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-04 17:55:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-05 08:30:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-05 17:20:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-08 08:00:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-08 17:45:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-09 08:25:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-09 17:35:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-10 07:55:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-10 17:50:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-11 08:15:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-11 17:30:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-12 08:10:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-12 17:40:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-15 08:30:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-15 17:15:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-16 08:00:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-16 17:45:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-17 08:20:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-17 17:35:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-18 07:55:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-18 17:50:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-19 08:10:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-19 17:30:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-22 08:25:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-22 17:40:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-23 08:00:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-23 17:50:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-24 08:15:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-24 17:25:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-25 08:10:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-25 17:45:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-26 08:30:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST005,2026-04-26 17:35:00,completed,Harris County Toll,5.25,CST,TX,connected
+CUST006,2026-04-01 07:30:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-01 17:45:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-02 07:15:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-02 18:00:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-03 07:50:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-03 17:30:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-04 07:45:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-04 18:15:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-05 07:20:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-05 17:50:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-08 07:35:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-08 18:05:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-09 07:55:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-09 17:40:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-10 07:25:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-10 18:10:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-11 07:50:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-11 17:35:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-12 07:30:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-12 18:00:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-15 07:45:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-15 17:50:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-16 07:20:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-16 18:15:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-17 07:55:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-17 17:40:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-18 07:35:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-18 18:05:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-19 07:50:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-19 17:45:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-22 07:25:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-22 18:10:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-23 07:45:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-23 17:55:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-24 07:30:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-24 18:00:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-25 07:55:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-25 17:40:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-26 07:35:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST006,2026-04-26 18:15:00,completed,Chicago Skyway,3.00,CST,IL,connected
+CUST007,2026-04-01 08:30:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-01 17:20:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-02 08:15:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-02 17:40:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-03 08:45:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-03 17:10:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-04 08:20:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-04 17:50:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-05 08:40:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-05 17:25:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-08 08:30:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-08 17:35:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-09 08:10:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-09 17:55:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-10 08:45:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-10 17:20:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-11 08:25:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-11 17:40:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-12 08:35:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-12 17:30:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-15 08:20:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-15 17:45:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-16 08:40:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-16 17:15:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-17 08:15:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-17 17:50:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-18 08:45:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-18 17:25:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-19 08:30:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-19 17:40:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-22 08:20:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-22 17:55:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-23 08:40:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-23 17:30:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-24 08:25:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-24 17:50:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-25 08:35:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-25 17:20:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-26 08:45:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST007,2026-04-26 17:40:00,completed,Pennsylvania Turnpike,3.75,EST,PA,connected
+CUST008,2026-04-01 07:00:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-01 18:30:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-02 07:20:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-02 19:00:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-03 07:45:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-03 18:15:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-04 07:10:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-04 18:45:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-05 07:50:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-05 18:20:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-08 07:15:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-08 18:50:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-09 07:40:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-09 19:10:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-10 07:25:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-10 18:35:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-11 07:55:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-11 19:05:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-12 07:30:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-12 18:40:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-15 07:45:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-15 18:50:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-16 07:10:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-16 19:00:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-17 07:50:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-17 18:30:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-18 07:20:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-18 19:15:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-19 07:40:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-19 18:45:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-22 07:55:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-22 19:00:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-23 07:25:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-23 18:50:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-24 07:45:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-24 19:10:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-25 07:30:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-25 18:40:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-26 07:50:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST008,2026-04-26 19:05:00,completed,Ohio Turnpike,2.50,EST,OH,connected
+CUST009,2026-04-01 08:15:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-01 17:00:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-02 08:40:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-02 16:45:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-03 08:10:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-03 17:20:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-04 08:35:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-04 16:55:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-05 08:20:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-05 17:15:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-08 08:45:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-08 17:05:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-09 08:15:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-09 16:50:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-10 08:30:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-10 17:10:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-11 08:50:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-11 16:55:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-12 08:25:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-12 17:20:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-15 08:40:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-15 17:00:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-16 08:10:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-16 17:15:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-17 08:35:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-17 16:50:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-18 08:20:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-18 17:05:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-19 08:45:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-19 16:55:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-22 08:30:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-22 17:10:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-23 08:50:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-23 17:20:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-24 08:15:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-24 17:00:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-25 08:40:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-25 16:50:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-26 08:25:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST009,2026-04-26 17:15:00,completed,Colorado Toll,4.50,MST,CO,connected
+CUST010,2026-04-01 07:30:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-01 18:45:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-02 07:50:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-02 19:00:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-03 07:20:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-03 18:30:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-04 07:45:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-04 19:15:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-05 08:00:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-05 18:50:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-08 07:35:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-08 19:05:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-09 07:55:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-09 18:40:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-10 07:25:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-10 18:55:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-11 07:50:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-11 19:20:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-12 07:40:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-12 18:50:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-15 08:00:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-15 18:45:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-16 07:30:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-16 19:10:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-17 07:55:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-17 18:50:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-18 07:45:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-18 19:00:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-19 08:10:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-19 18:35:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-22 07:40:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-22 19:15:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-23 08:00:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-23 18:50:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-24 07:50:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-24 19:05:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-25 08:15:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-25 18:40:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-26 07:55:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST010,2026-04-26 19:10:00,completed,Washington State Toll,3.25,PST,WA,connected
+CUST011,2026-04-01 09:00:00,completed,NJ Turnpike Exit 11,4.50,EST,NJ,connected
+CUST011,2026-04-05 14:30:00,completed,NJ Turnpike Exit 11,4.50,EST,NJ,connected
+CUST011,2026-04-10 08:45:00,completed,NJ Turnpike Exit 11,4.50,EST,NJ,connected
+CUST011,2026-04-15 16:20:00,completed,NJ Turnpike Exit 11,4.50,EST,NJ,connected
+CUST011,2026-04-20 10:15:00,completed,NJ Turnpike Exit 11,4.50,EST,NJ,connected
