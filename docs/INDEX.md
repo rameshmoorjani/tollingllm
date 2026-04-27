@@ -11,22 +11,32 @@
 - **[AWS_DEPLOYMENT_QUICK_START.md](guides/AWS_DEPLOYMENT_QUICK_START.md)** - ⭐ Start here for 5-minute AWS deployment
 - **[AWS_DEPLOYMENT_APPRUNNER.md](guides/AWS_DEPLOYMENT_APPRUNNER.md)** - Detailed AppRunner setup
 - **[DEPLOYMENT_SUMMARY.md](guides/DEPLOYMENT_SUMMARY.md)** - Final deployment checklist
+- **[DEPLOYMENT.md](guides/DEPLOYMENT.md)** - General deployment overview
+- **[PRODUCTION.md](guides/PRODUCTION.md)** - Production deployment guide
 
 ### Security & Credentials
 - **[AWS_CREDENTIALS_ROTATION.md](guides/AWS_CREDENTIALS_ROTATION.md)** - ⚠️ How to rotate exposed credentials
 - **[AWS_SETUP_GUIDE.md](guides/AWS_SETUP_GUIDE.md)** - AWS account setup
 - **[AWS_CREATE_CREDENTIALS.md](guides/AWS_CREATE_CREDENTIALS.md)** - Create IAM user and access keys
+- **[CREDENTIALS_GUIDE.md](guides/CREDENTIALS_GUIDE.md)** - Credential management best practices
 
 ## 💻 Database & Setup
 
+- **[SETUP_GUIDE.md](../SETUP_GUIDE.md)** - Initial local development setup
+- **[SETUP_INSTRUCTIONS.md](guides/SETUP_INSTRUCTIONS.md)** - Detailed setup steps
+- **[QUICKSTART.md](guides/QUICKSTART.md)** - Quick start guide
 - **[DATA_SEEDING_GUIDE.md](guides/DATA_SEEDING_GUIDE.md)** - Load test data into MongoDB
 - **[CREATE_IAM_USER_SIMPLE.md](guides/CREATE_IAM_USER_SIMPLE.md)** - AWS IAM user creation steps
-- **[CREDENTIALS_GUIDE.md](guides/CREDENTIALS_GUIDE.md)** - Credential management best practices
 
 ## 🔧 AWS Integration
 
 - **[AWS_BEDROCK_INTEGRATION.md](guides/AWS_BEDROCK_INTEGRATION.md)** - AWS Bedrock LLM setup
-- **[AWS_CREATE_CREDENTIALS.md](guides/AWS_CREATE_CREDENTIALS.md)** - AWS credential setup
+
+## 📖 Project Information
+
+- **[CONTRIBUTING.md](guides/CONTRIBUTING.md)** - How to contribute
+- **[VERSIONING.md](guides/VERSIONING.md)** - Project versioning strategy
+- **[PROJECT_STRUCTURE.md](../PROJECT_STRUCTURE.md)** - Complete project structure reference
 
 ## 🐛 Troubleshooting
 

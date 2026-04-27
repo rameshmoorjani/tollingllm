@@ -9,7 +9,9 @@ scripts/
 ├── deployment/          # AWS deployment automation
 │   ├── deploy-to-apprunner.ps1    # Windows deployment (PowerShell)
 │   └── deploy-to-apprunner.sh     # macOS/Linux deployment (Bash)
-└── database/           # Database utilities
+├── database/            # Database utilities (coming soon)
+├── deploy_sagemaker.py  # AWS SageMaker deployment
+└── deploy_simple.py     # Simple deployment utility
 ```
 
 ## 🚀 Deployment Scripts
