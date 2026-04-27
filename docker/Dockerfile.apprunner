@@ -1,0 +1,58 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Copy and install backend dependencies
+COPY backend/package*.json ./backend/
+WORKDIR /app/backend
+RUN npm install --production && npm install -D typescript ts-node
+
+# Copy backend source
+COPY backend/src ./src
+COPY backend/tsconfig.json ./
+
+# Build backend
+RUN npm run build
+
+# Go back to app root
+WORKDIR /app
+
+# Copy and install frontend dependencies
+COPY frontend/package*.json ./frontend/
+WORKDIR /app/frontend
+RUN npm install
+
+# Copy frontend source
+COPY frontend/src ./src
+COPY frontend/public ./public
+COPY frontend/index.html ./
+COPY frontend/vite.config.ts ./
+COPY frontend/tsconfig*.json ./
+
+# Build frontend
+RUN npm run build
+
+# Copy built frontend to backend public folder
+RUN mkdir -p /app/backend/dist/public && \
+    cp -r /app/frontend/dist/* /app/backend/dist/public/
+
+# Final stage - minimize image size
+FROM node:18-alpine
+
+WORKDIR /app/backend
+
+# Copy only necessary files from build
+COPY --from=0 /app/backend/dist ./dist
+COPY --from=0 /app/backend/node_modules ./node_modules
+COPY --from=0 /app/backend/package.json ./
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:5000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"
+
+EXPOSE 5000
+
+ENV NODE_ENV=production
+ENV LOG_LEVEL=info
+
+CMD ["node", "dist/server.js"]

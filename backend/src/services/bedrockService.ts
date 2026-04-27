@@ -1,11 +1,25 @@
 import {
   BedrockRuntimeClient,
   InvokeModelCommand,
-  InvokeModelStreamingCommand,
 } from '@aws-sdk/client-bedrock-runtime';
 import dotenv from 'dotenv';
+import * as fs from 'fs';
+import * as path from 'path';
 
 dotenv.config();
+
+const DEBUG_LOG_FILE = path.join('/tmp', 'bedrock-debug.log');
+
+function debugLog(message: string) {
+  const timestamp = new Date().toISOString();
+  const logLine = `${timestamp} - ${message}\n`;
+  console.error(logLine);
+  try {
+    fs.appendFileSync(DEBUG_LOG_FILE, logLine);
+  } catch (e) {
+    // Silently fail if we can't write to file
+  }
+}
 
 interface LLMRequest {
   prompt: string;
@@ -46,10 +60,10 @@ export class BedrockService {
     this.client = new BedrockRuntimeClient({ region });
     this.modelId = modelId;
 
-    console.log(`🤖 AWS Bedrock Service initialized`);
-    console.log(`📍 Region: ${region}`);
-    console.log(`📊 Model: ${this.modelId}`);
-    console.log(`💡 Expected response time: <1 second`);
+    debugLog(`🤖 AWS Bedrock Service initialized`);
+    debugLog(`📍 Region: ${region}`);
+    debugLog(`📊 Model: ${this.modelId}`);
+    debugLog(`💡 Expected response time: <1 second`);
   }
 
   async invoke(request: LLMRequest): Promise<LLMResponse> {
@@ -60,8 +74,10 @@ export class BedrockService {
       const temperature = request.temperature || 0.7;
       const maxTokens = request.max_tokens || 2048;
 
+      debugLog(`📤 Calling Bedrock with model: ${this.modelId}`);
+      debugLog(`📝 Prompt length: ${prompt.length} chars`);
+
       // Prepare payload for Llama 3.1 model
-      // Format: <|begin_of_text|><|start_header_id|>user<|end_header_id|>{prompt}<|eot_id|>...
       const payload = {
         prompt: `<|begin_of_text|><|start_header_id|>user<|end_header_id|>
 
@@ -77,24 +93,36 @@ ${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
         contentType: 'application/json',
       });
 
+      debugLog(`🔄 Sending request to Bedrock...`);
       const response = await this.client.send(command);
-      const responseBody = JSON.parse(new TextDecoder().decode(response.body));
+      debugLog(`✅ Got response from Bedrock`);
 
-      const message = responseBody.generation || '';
+      const responseText = new TextDecoder().decode(response.body);
+      debugLog(`📨 Raw response: ${responseText.substring(0, 200)}`);
+
+      const responseBody = JSON.parse(responseText);
+      debugLog(`📦 Parsed response body: ${JSON.stringify(responseBody).substring(0, 300)}`);
+      
+      const message = responseBody.generation || responseBody.output?.text || '';
+      debugLog(`💬 Extracted message length: ${message.length}`);
 
       if (!message) {
+        debugLog(`❌ Empty message in response: ${JSON.stringify(responseBody)}`);
         throw new Error('Empty response from Bedrock');
       }
 
       const processingTime = Date.now() - startTime;
 
-      console.log(`✅ Bedrock response received in ${processingTime}ms`);
+      debugLog(`✅ Bedrock response received in ${processingTime}ms`);
+      debugLog(`📄 Message length: ${message.length} chars`);
       return {
         message: message.trim(),
         processing_time_ms: processingTime,
       };
     } catch (error: any) {
-      console.error('❌ Bedrock invocation error:', error.message || error);
+      const processingTime = Date.now() - startTime;
+      debugLog(`❌ Bedrock error after ${processingTime}ms: ${error.message || error}`);
+      debugLog(`🔍 Full error: ${JSON.stringify(error)}`);
       throw error;
     }
   }
@@ -110,7 +138,11 @@ ${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
       const temperature = request.temperature || 0.7;
       const maxTokens = request.max_tokens || 2048;
 
-      // Prepare payload for Llama 3.1 model
+      debugLog(`📤 Stream: Calling Bedrock with model: ${this.modelId}`);
+      debugLog(`📝 Stream: Prompt length: ${prompt.length} chars`);
+
+      // For streaming with Bedrock, we'll use regular invoke and split response
+      // since streaming requires a different API approach
       const payload = {
         prompt: `<|begin_of_text|><|start_header_id|>user<|end_header_id|>
 
@@ -120,37 +152,48 @@ ${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
         top_p: 0.9,
       };
 
-      const command = new InvokeModelStreamingCommand({
+      const command = new InvokeModelCommand({
         modelId: this.modelId,
         body: JSON.stringify(payload),
         contentType: 'application/json',
       });
 
+      debugLog(`🔄 Stream: Sending request to Bedrock...`);
       const response = await this.client.send(command);
+      debugLog(`✅ Stream: Got response from Bedrock`);
 
-      if (!response.stream) {
-        throw new Error('No stream available from Bedrock');
+      const responseText = new TextDecoder().decode(response.body);
+      debugLog(`📨 Stream: Raw response: ${responseText.substring(0, 200)}`);
+      
+      const responseBody = JSON.parse(responseText);
+      debugLog(`📦 Stream: Parsed response body keys: ${Object.keys(responseBody).join(', ')}`);
+
+      const fullMessage = responseBody.generation || '';
+      debugLog(`💬 Stream: Extracted message length: ${fullMessage.length}`);
+
+      if (!fullMessage) {
+        debugLog(`❌ Stream: Empty message in response: ${JSON.stringify(responseBody)}`);
+        throw new Error('Empty response from Bedrock');
       }
 
-      let fullMessage = '';
-
-      for await (const event of response.stream) {
-        if (event.contentBlockDelta?.delta?.text) {
-          const text = event.contentBlockDelta.delta.text;
-          fullMessage += text;
-          onChunk(text);
-        }
+      // Simulate streaming by splitting response into chunks
+      const words = fullMessage.split(' ');
+      debugLog(`📤 Stream: Splitting into ${words.length} chunks`);
+      for (const word of words) {
+        onChunk(word + ' ');
       }
 
       const processingTime = Date.now() - startTime;
 
-      console.log(`✅ Bedrock stream completed in ${processingTime}ms`);
+      debugLog(`✅ Stream: Bedrock stream completed in ${processingTime}ms`);
       return {
         message: fullMessage.trim(),
         processing_time_ms: processingTime,
       };
     } catch (error: any) {
-      console.error('❌ Bedrock stream error:', error.message || error);
+      const processingTime = Date.now() - startTime;
+      debugLog(`❌ Stream error after ${processingTime}ms: ${error.message || error}`);
+      debugLog(`🔍 Stream: Full error: ${JSON.stringify(error)}`);
       throw error;
     }
   }

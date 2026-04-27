@@ -24,7 +24,7 @@ function BrowseScreen() {
     customer_id: '',
     status: '',
     page: 1,
-    limit: 20,
+    limit: 10000,
   })
 
   const fetchTransactions = async () => {
