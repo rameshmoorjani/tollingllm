@@ -3,6 +3,8 @@ import { io, Socket } from 'socket.io-client'
 import ChatWindow from '../components/ChatWindow'
 import '../styles/Agent.css'
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+
 function AgentScreen() {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [sessionId, setSessionId] = useState('')
@@ -13,7 +15,7 @@ function AgentScreen() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const newSocket = io('http://localhost:5000')
+    const newSocket = io(apiBaseUrl)
 
     newSocket.on('connect', () => {
       setConnected(true)

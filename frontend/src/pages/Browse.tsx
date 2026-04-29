@@ -3,6 +3,8 @@ import axios from 'axios'
 import DataTable from '../components/DataTable'
 import '../styles/Browse.css'
 
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+
 interface Transaction {
   _id: string
   customer_id: string
@@ -38,7 +40,7 @@ function BrowseScreen() {
       params.append('limit', filters.limit.toString())
 
       const response = await axios.get(
-        `http://localhost:5000/api/transactions?${params}`
+        `${apiBaseUrl}/api/transactions?${params}`
       )
 
       setTransactions(response.data.data)
@@ -68,7 +70,7 @@ function BrowseScreen() {
       const params = new URLSearchParams()
       if (filters.customer_id) params.append('customer_id', filters.customer_id)
 
-      window.location.href = `http://localhost:5000/api/transactions/export/csv?${params}`
+      window.location.href = `${apiBaseUrl}/api/transactions/export/csv?${params}`
     } catch (err) {
       console.error('Export failed:', err)
     }
@@ -88,7 +90,7 @@ function BrowseScreen() {
           const csvData = event.target?.result as string
           
           const response = await axios.post(
-            'http://localhost:5000/api/transactions/import/csv',
+            `${apiBaseUrl}/api/transactions/import/csv`,
             { csvData }
           )
 
