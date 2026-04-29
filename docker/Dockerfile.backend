@@ -9,7 +9,6 @@ RUN npm install
 
 COPY backend/src ./src
 COPY backend/tsconfig.json ./
-COPY backend/.env ./
 
 # Compile TypeScript
 RUN npm run build
