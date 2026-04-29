@@ -25,13 +25,23 @@ export class MongoDBService {
     const dbName = process.env.MONGODB_DATABASE || 'tolling_db';
     const collectionName = process.env.MONGODB_COLLECTION || 'transactions';
 
-    this.client = new MongoClient(mongoUri);
-    await this.client.connect();
+    try {
+      this.client = new MongoClient(mongoUri, { 
+        connectTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 5000 
+      });
+      await this.client.connect();
 
-    this.db = this.client.db(dbName);
-    this.collection = this.db.collection<Transaction>(collectionName);
+      this.db = this.client.db(dbName);
+      this.collection = this.db.collection<Transaction>(collectionName);
 
-    console.log('✅ Connected to MongoDB');
+      console.log('✅ Connected to MongoDB');
+    } catch (error: any) {
+      console.error('⚠️  MongoDB connection failed:', error.message);
+      console.log('💡 Tip: Set MONGODB_URI environment variable to a valid MongoDB Atlas connection string');
+      // Don't rethrow - allow app to start without MongoDB
+      this.client = null;
+    }
   }
 
   async disconnect(): Promise<void> {
@@ -50,22 +60,26 @@ export class MongoDBService {
     limit: number = 20
   ): Promise<Transaction[]> {
     await this.connect();
-    return this.collection!.find(filter).skip(skip).limit(limit).toArray();
+    if (!this.collection) return [];
+    return this.collection.find(filter).skip(skip).limit(limit).toArray();
   }
 
   async countTransactions(filter: any = {}): Promise<number> {
     await this.connect();
-    return this.collection!.countDocuments(filter);
+    if (!this.collection) return 0;
+    return this.collection.countDocuments(filter);
   }
 
   async getTransactionById(id: string): Promise<Transaction | null> {
     await this.connect();
-    return this.collection!.findOne({ _id: new ObjectId(id) });
+    if (!this.collection) return null;
+    return this.collection.findOne({ _id: new ObjectId(id) });
   }
 
   async searchTransactions(query: string): Promise<Transaction[]> {
     await this.connect();
-    return this.collection!
+    if (!this.collection) return [];
+    return this.collection
       .find({
         $or: [
           { toll_point_name: { $regex: query, $options: 'i' } },
@@ -79,17 +93,20 @@ export class MongoDBService {
 
   async getCustomerTransactions(customerId: string): Promise<Transaction[]> {
     await this.connect();
-    return this.collection!.find({ customer_id: customerId }).toArray();
+    if (!this.collection) return [];
+    return this.collection.find({ customer_id: customerId }).toArray();
   }
 
   async getAllTransactions(): Promise<Transaction[]> {
     await this.connect();
-    return this.collection!.find({}).toArray();
+    if (!this.collection) return [];
+    return this.collection.find({}).toArray();
   }
 
   async getMaxTollTransaction(): Promise<any> {
     await this.connect();
-    const result = await this.collection!
+    if (!this.collection) return null;
+    const result = await this.collection
       .find({})
       .sort({ toll_amount: -1 })
       .limit(1)
@@ -99,7 +116,8 @@ export class MongoDBService {
 
   async getTopCustomers(limit: number = 10): Promise<any[]> {
     await this.connect();
-    return this.collection!
+    if (!this.collection) return [];
+    return this.collection
       .aggregate([
         {
           $group: {
@@ -119,7 +137,8 @@ export class MongoDBService {
 
   async getCustomerStats(): Promise<any[]> {
     await this.connect();
-    return this.collection!
+    if (!this.collection) return [];
+    return this.collection
       .aggregate([
         {
           $group: {
@@ -139,6 +158,7 @@ export class MongoDBService {
 
   async insertTransactions(transactions: any[]): Promise<any> {
     await this.connect();
-    return this.collection!.insertMany(transactions);
+    if (!this.collection) return { insertedCount: 0 };
+    return this.collection.insertMany(transactions);
   }
 }

@@ -1,0 +1,1 @@
+{"Version":"2012-10-17","Statement":[{"Sid":"Bedrock","Effect":"Allow","Action":["bedrock:InvokeModel","bedrock:ListModels"],"Resource":"*"},{"Sid":"ECR","Effect":"Allow","Action":["ecr:GetAuthorizationToken","ecr:GetDownloadUrlForLayer","ecr:BatchGetImage","ecr:BatchCheckLayerAvailability"],"Resource":"*"}]}

@@ -1,0 +1,21 @@
+Customer ID,Toll Time,Toll Status,Toll Point,Amount,Timezone,State,Connection Status
+CUST001,2024-04-15 08:30:00,Completed,Exit 42 - Highway 101,5.50,PST,California,Online
+CUST002,2024-04-15 09:15:00,Completed,Mile Marker 25 - I-90,4.75,CST,Illinois,Online
+CUST003,2024-04-15 10:45:00,Completed,Toll Plaza A - Route 495,6.25,EST,Massachusetts,Online
+CUST004,2024-04-15 11:20:00,Pending,Toll Booth 3 - Turnpike,3.50,EST,New Jersey,Online
+CUST005,2024-04-15 12:00:00,Completed,Exit 88 - I-95,7.00,EST,Connecticut,Online
+CUST001,2024-04-15 13:30:00,Completed,Exit 42 - Highway 101,5.50,PST,California,Online
+CUST006,2024-04-15 14:15:00,Completed,Golden Gate Bridge,8.50,PST,California,Online
+CUST002,2024-04-15 15:45:00,Completed,Skyway Toll - I-290,5.25,CST,Illinois,Online
+CUST007,2024-04-15 16:20:00,Failed,Toll Point B - Route 128,6.00,EST,Massachusetts,Offline
+CUST008,2024-04-15 17:00:00,Completed,Toll Plaza C - I-84,4.50,PST,Oregon,Online
+CUST003,2024-04-15 18:30:00,Completed,Toll Booth 5 - Turnpike,3.50,EST,New Jersey,Online
+CUST009,2024-04-15 19:15:00,Completed,Bridge Toll - Highway 99,9.00,PST,California,Online
+CUST010,2024-04-16 08:00:00,Completed,Exit 20 - I-290,5.00,CST,Illinois,Online
+CUST004,2024-04-16 09:30:00,Completed,Mile Marker 50 - I-94,4.25,CST,Wisconsin,Online
+CUST005,2024-04-16 10:45:00,Completed,Toll Plaza A - Route 495,6.25,EST,Massachusetts,Online
+CUST006,2024-04-16 11:20:00,Pending,Exit 88 - I-95,7.00,EST,Connecticut,Online
+CUST007,2024-04-16 12:00:00,Completed,Golden Gate Bridge,8.50,PST,California,Online
+CUST001,2024-04-16 13:45:00,Completed,Toll Point B - Route 128,6.00,EST,Massachusetts,Online
+CUST008,2024-04-16 14:30:00,Completed,Toll Plaza D - I-405,5.75,PST,California,Online
+CUST009,2024-04-16 15:15:00,Failed,Toll Booth 7 - Turnpike,3.50,EST,New Jersey,Offline

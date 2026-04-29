@@ -1,0 +1,7 @@
+{
+    "Region":  "us-east-1",
+    "KeyPair":  "tolling-llm-key",
+    "SGId":  "sg-08b9160e508170e99",
+    "InstanceId":  null,
+    "PublicIP":  "184.73.101.125"
+}

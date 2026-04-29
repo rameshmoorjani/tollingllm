@@ -1,0 +1,28 @@
+{
+  "ServiceName": "tolling-llm-v4",
+  "SourceConfiguration": {
+    "ImageRepository": {
+      "ImageRepositoryType": "ECR",
+      "ImageIdentifier": "105726692206.dkr.ecr.us-east-1.amazonaws.com/tolling-llm:latest",
+      "ImageConfiguration": {
+        "Port": "5000"
+      }
+    },
+    "AuthenticationConfiguration": {
+      "AccessRoleArn": "arn:aws:iam::105726692206:role/AppRunnerTollingLLMRole"
+    }
+  },
+  "InstanceConfiguration": {
+    "Cpu": "1 vCPU",
+    "Memory": "3 GB",
+    "InstanceRoleArn": "arn:aws:iam::105726692206:role/AppRunnerTollingLLMRole"
+  },
+  "HealthCheckConfiguration": {
+    "Protocol": "HTTP",
+    "Path": "/",
+    "Interval": 10,
+    "Timeout": 5,
+    "HealthyThreshold": 1,
+    "UnhealthyThreshold": 5
+  }
+}

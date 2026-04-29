@@ -81,10 +81,10 @@ app.use((req: Request, res: Response) => {
 
 const PORT = process.env.API_PORT || 5000;
 
-server.listen(PORT, () => {
-  console.log(`🚀 TollingLLM Backend running on http://localhost:${PORT}`);
-  console.log(`📄 API Docs: http://localhost:${PORT}/api/docs`);
-  console.log(`💬 WebSocket: ws://localhost:${PORT}`);
+(server as any).listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 TollingLLM Backend running on http://0.0.0.0:${PORT}`);
+  console.log(`📄 API Docs: http://0.0.0.0:${PORT}/api/docs`);
+  console.log(`💬 WebSocket: ws://0.0.0.0:${PORT}`);
 });
 
 export { app, io };

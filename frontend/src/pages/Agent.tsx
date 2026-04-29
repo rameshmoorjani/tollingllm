@@ -13,6 +13,7 @@ function AgentScreen() {
   const [messages, setMessages] = useState<any[]>([])
   const [inputValue, setInputValue] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const newSocket = io(apiBaseUrl, {
@@ -93,8 +94,21 @@ function AgentScreen() {
     })
 
     newSocket.on('error', (data) => {
+      const errorMsg = data.message || 'An error occurred while processing your query'
       console.error('Error:', data)
+      setError(errorMsg)
       setLoading(false)
+      // Show error in messages
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          role: 'agent',
+          message: `❌ Error: ${errorMsg}`,
+          timestamp: new Date(),
+          isError: true,
+        },
+      ])
     })
 
     newSocket.on('disconnect', () => {
@@ -114,6 +128,9 @@ function AgentScreen() {
       alert('Please select a customer/mode and enter a message')
       return
     }
+
+    // Clear previous error
+    setError(null)
 
     // Create both messages at once to avoid batching issues
     const userMsg = {

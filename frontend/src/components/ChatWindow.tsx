@@ -7,6 +7,7 @@ interface Message {
   message: string
   timestamp: Date
   metadata?: any
+  isError?: boolean
 }
 
 interface ChatWindowProps {
@@ -53,7 +54,10 @@ function ChatWindow({
         {messages.map((msg) => {
           console.log('🎨 Rendering message:', msg.id, msg.role, msg.message.substring(0, 50))
           return (
-            <div key={msg.id} className={`message ${msg.role}`}>
+            <div 
+              key={msg.id} 
+              className={`message ${msg.role}${msg.isError ? ' error' : ''}`}
+            >
               <div className="message-content">
                 {msg.role === 'user' ? '👤' : '🤖'} {msg.message}
               </div>
