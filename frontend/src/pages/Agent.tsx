@@ -15,11 +15,16 @@ function AgentScreen() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const newSocket = io(apiBaseUrl)
+    const newSocket = io(apiBaseUrl, {
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 5,
+    })
 
     newSocket.on('connect', () => {
       setConnected(true)
-      console.log('✅ Connected to WebSocket')
+      console.log('✅ Connected to WebSocket', apiBaseUrl)
 
       // Create new session
       newSocket.emit('join_chat', { session_id: undefined })
