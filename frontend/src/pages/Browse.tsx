@@ -3,7 +3,7 @@ import axios from 'axios'
 import DataTable from '../components/DataTable'
 import '../styles/Browse.css'
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+const apiBaseUrl = (window as any).APP_CONFIG?.API_BASE_URL || 'http://localhost:5000'
 
 interface Transaction {
   _id: string
