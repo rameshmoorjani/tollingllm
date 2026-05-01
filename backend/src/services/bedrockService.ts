@@ -36,9 +36,9 @@ interface LLMResponse {
  * AWS Bedrock LLM Service
  * 
  * Supported models (use model IDs):
- * - meta.llama3-8b-instruct-v1:0 (fast, good quality) - RECOMMENDED
- * - mistral.mistral-7b-instruct-v0:2 (fast, multilingual)
- * - meta.llama3-70b-instruct-v1:0 (larger, more capable)
+ * - mistral.mistral-7b-instruct-v0:2 (fast, lightweight, best rate limits) - RECOMMENDED
+ * - meta.llama3-8b-instruct-v1:0 (capable but slower, higher token usage)
+ * - mistral.mistral-large (more capable, slower)
  * - anthropic.claude-haiku-20242022-12-06 (slower but very accurate)
  * 
  * Setup Instructions:
@@ -80,12 +80,10 @@ export class BedrockService {
         debugLog(`📤 Calling Bedrock with model: ${this.modelId} (attempt ${retries + 1}/${maxRetries + 1})`);
         debugLog(`📝 Prompt length: ${prompt.length} chars`);
 
-        // Prepare payload for Llama 3.1 model
+        // Prepare payload for Mistral model (faster, better rate limits)
         const payload = {
-          prompt: `<|begin_of_text|><|start_header_id|>user<|end_header_id|>
-
-${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
-          max_gen_len: maxTokens,
+          prompt: `[INST] ${prompt} [/INST]`,
+          max_tokens: maxTokens,
           temperature,
           top_p: 0.9,
         };
@@ -106,7 +104,8 @@ ${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
         const responseBody = JSON.parse(responseText);
         debugLog(`📦 Parsed response body: ${JSON.stringify(responseBody).substring(0, 300)}`);
         
-        const message = responseBody.generation || responseBody.output?.text || '';
+        // Mistral returns text in different format than Llama
+        const message = responseBody.outputs?.[0]?.text || responseBody.generation || responseBody.output?.text || '';
         debugLog(`💬 Extracted message length: ${message.length}`);
 
         if (!message) {
@@ -203,10 +202,8 @@ ${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
         // For streaming with Bedrock, we'll use regular invoke and split response
         // since streaming requires a different API approach
         const payload = {
-          prompt: `<|begin_of_text|><|start_header_id|>user<|end_header_id|>
-
-${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
-          max_gen_len: maxTokens,
+          prompt: `[INST] ${prompt} [/INST]`,
+          max_tokens: maxTokens,
           temperature,
           top_p: 0.9,
         };
@@ -227,7 +224,8 @@ ${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
         const responseBody = JSON.parse(responseText);
         debugLog(`📦 Stream: Parsed response body keys: ${Object.keys(responseBody).join(', ')}`);
 
-        const fullMessage = responseBody.generation || '';
+        // Mistral returns text in different format than Llama
+        const fullMessage = responseBody.outputs?.[0]?.text || responseBody.generation || '';
         debugLog(`💬 Stream: Extracted message length: ${fullMessage.length}`);
 
         if (!fullMessage) {
