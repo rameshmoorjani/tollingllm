@@ -1,5 +1,6 @@
 import { MongoDBService } from './mongodbService';
 import { BedrockService } from './bedrockService';
+import crypto from 'crypto';
 
 interface Transaction {
   customer_id: string;
@@ -8,6 +9,12 @@ interface Transaction {
   tolltime: Date;
   tollstatus: string;
   connection_status: boolean;
+}
+
+interface CacheEntry {
+  response: string;
+  timestamp: number;
+  ttl: number; // Time to live in milliseconds
 }
 
 export class ChatAgentService {
@@ -19,9 +26,50 @@ export class ChatAgentService {
   private minRequestIntervalMs = 1000; // Minimum 1 second between requests
   private lastRequestTime = 0;
 
+  // Response cache to avoid repeated Bedrock calls
+  private responseCache: Map<string, CacheEntry> = new Map();
+  private cacheExpireMs = 3600000; // 1 hour cache TTL
+
   constructor() {
     this.mongoService = new MongoDBService();
     this.bedrockService = new BedrockService();
+  }
+
+  /**
+   * Generate a cache key from customer ID, query, and transaction count
+   */
+  private getCacheKey(customerId: string, query: string, transactionCount: number): string {
+    const keyData = `${customerId}:${query}:${transactionCount}`;
+    return crypto.createHash('md5').update(keyData).digest('hex');
+  }
+
+  /**
+   * Check if a cached response exists and is still valid
+   */
+  private getCachedResponse(cacheKey: string): string | null {
+    const entry = this.responseCache.get(cacheKey);
+    if (!entry) return null;
+
+    const age = Date.now() - entry.timestamp;
+    if (age > entry.ttl) {
+      this.responseCache.delete(cacheKey);
+      return null;
+    }
+
+    console.log(`✅ Cache hit! Using cached response (${age}ms old)`);
+    return entry.response;
+  }
+
+  /**
+   * Store a response in cache
+   */
+  private setCachedResponse(cacheKey: string, response: string): void {
+    this.responseCache.set(cacheKey, {
+      response,
+      timestamp: Date.now(),
+      ttl: this.cacheExpireMs,
+    });
+    console.log(`💾 Cached response for future use`);
   }
 
   /**
@@ -74,6 +122,20 @@ export class ChatAgentService {
         return `No tolling transactions found${isAllCustomers ? '' : ` for customer ${customerId}`}.`;
       }
 
+      // Check cache first (avoid Bedrock call if we have a recent response)
+      const cacheKey = this.getCacheKey(customerId, query, transactions.length);
+      const cachedResponse = this.getCachedResponse(cacheKey);
+      if (cachedResponse) {
+        if (onChunk) {
+          // Stream the cached response in chunks
+          const words = cachedResponse.split(' ');
+          for (const word of words) {
+            onChunk(word + ' ');
+          }
+        }
+        return cachedResponse;
+      }
+
       // Generate prompt for Bedrock
       const prompt = this.generatePrompt(customerId, transactions, query, isAllCustomers);
 
@@ -91,6 +153,10 @@ export class ChatAgentService {
           );
           response = result.message;
         }
+
+        // Cache the response for future use
+        this.setCachedResponse(cacheKey, response);
+
         return response;
       } catch (bedrockError: any) {
         console.error('Bedrock error:', bedrockError.message);
@@ -102,8 +168,8 @@ export class ChatAgentService {
           bedrockError.message.includes('quota')
         ) {
           throw new Error(
-            'AI service is currently overloaded. Please wait 30 seconds and try again. ' +
-            'For multiple concurrent users, this is expected due to AWS rate limits.'
+            'AI service is currently overloaded due to AWS rate limits. Please wait 30-60 seconds and try again. ' +
+            'We are caching responses to reduce API calls.'
           );
         }
         

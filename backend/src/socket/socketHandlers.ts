@@ -51,40 +51,54 @@ export function setupSocketHandlers(io: Server) {
 
           // Process query with streaming
           let fullResponse = '';
+          let hasError = false;
 
-          await chatAgent.processQuery(
-            customer_id,
-            message,
-            (chunk: string) => {
-              fullResponse += chunk;
-              socket.emit('agent_chunk', { chunk, message_id: userMsg.id });
-            }
-          );
-
-          // Add agent response to history
-          const agentMsg: ChatMessage = {
-            id: uuidv4(),
-            role: 'agent',
-            message: fullResponse,
-            timestamp: new Date(),
-            metadata: {
+          try {
+            await chatAgent.processQuery(
               customer_id,
-              query: message,
-            },
-          };
-          sessionMessages.push(agentMsg);
+              message,
+              (chunk: string) => {
+                fullResponse += chunk;
+                socket.emit('agent_chunk', { chunk, message_id: userMsg.id });
+              }
+            );
+          } catch (processError: any) {
+            hasError = true;
+            console.error('Query processing error:', processError.message);
+            socket.emit('agent_error', {
+              message_id: userMsg.id,
+              error: processError.message || 'Failed to process query',
+            });
+            return; // Stop processing if there was an error
+          }
 
-          socket.emit('agent_complete', {
-            message_id: agentMsg.id,
-            message: fullResponse,
-            metadata: agentMsg.metadata,
-          });
+          // Only add agent response if query succeeded
+          if (!hasError && fullResponse) {
+            // Add agent response to history
+            const agentMsg: ChatMessage = {
+              id: uuidv4(),
+              role: 'agent',
+              message: fullResponse,
+              timestamp: new Date(),
+              metadata: {
+                customer_id,
+                query: message,
+              },
+            };
+            sessionMessages.push(agentMsg);
 
-          activeSessions.set(session_id, sessionMessages);
+            socket.emit('agent_complete', {
+              message_id: agentMsg.id,
+              message: fullResponse,
+              metadata: agentMsg.metadata,
+            });
+
+            activeSessions.set(session_id, sessionMessages);
+          }
         } catch (error: any) {
           console.error('Error processing query:', error);
-          socket.emit('error', {
-            message: error.message || 'Failed to process query',
+          socket.emit('agent_error', {
+            error: error.message || 'Failed to process query',
           });
         }
       }
