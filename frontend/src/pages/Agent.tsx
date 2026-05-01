@@ -206,8 +206,8 @@ function AgentScreen() {
       message: inputValue,
     })
 
-    // Set a timeout in case the server doesn't respond
-    const timeoutId = setTimeout(() => {
+    // Set a timeout in case the server doesn't respond (2 minutes)
+    const queryTimeout = window.setTimeout(() => {
       setLoading(false)
       const errorMsg = 'Request timeout. The AI service took too long to respond. Try again in a moment.'
       setError(errorMsg)
@@ -225,10 +225,12 @@ function AgentScreen() {
         })
         return updated
       })
-    }, 120000) // 2 minute timeout
+    }, 120000)
 
     // Store timeout ID to clear if response comes in
-    (socket as any)._queryTimeout = timeoutId
+    if (socket) {
+      (socket as any)._queryTimeout = queryTimeout
+    }
 
     setInputValue('')
   }
