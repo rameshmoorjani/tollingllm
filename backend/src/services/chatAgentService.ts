@@ -13,10 +13,44 @@ interface Transaction {
 export class ChatAgentService {
   private mongoService: MongoDBService;
   private bedrockService: BedrockService;
+  
+  // Request queue to prevent rate limiting
+  private requestQueue: Promise<any> = Promise.resolve();
+  private minRequestIntervalMs = 1000; // Minimum 1 second between requests
+  private lastRequestTime = 0;
 
   constructor() {
     this.mongoService = new MongoDBService();
     this.bedrockService = new BedrockService();
+  }
+
+  /**
+   * Queue a Bedrock request to prevent concurrent rate limiting
+   */
+  private async queueBedrockRequest<T>(
+    fn: () => Promise<T>
+  ): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.requestQueue = this.requestQueue
+        .then(async () => {
+          // Ensure minimum interval between requests
+          const timeSinceLastRequest = Date.now() - this.lastRequestTime;
+          if (timeSinceLastRequest < this.minRequestIntervalMs) {
+            await new Promise(r => 
+              setTimeout(r, this.minRequestIntervalMs - timeSinceLastRequest)
+            );
+          }
+          
+          this.lastRequestTime = Date.now();
+          try {
+            const result = await fn();
+            resolve(result);
+          } catch (error) {
+            reject(error);
+          }
+        })
+        .catch(reject);
+    });
   }
 
   async processQuery(
@@ -43,20 +77,38 @@ export class ChatAgentService {
       // Generate prompt for Bedrock
       const prompt = this.generatePrompt(customerId, transactions, query, isAllCustomers);
 
-      // Call Bedrock - NO FALLBACK
-      let response: string;
-      if (onChunk) {
-        const result = await this.bedrockService.streamInvoke(
-          { prompt },
-          onChunk
-        );
-        response = result.message;
-      } else {
-        const result = await this.bedrockService.invoke({ prompt });
-        response = result.message;
+      // Queue Bedrock request to prevent rate limiting
+      try {
+        let response: string;
+        if (onChunk) {
+          const result = await this.queueBedrockRequest(() =>
+            this.bedrockService.streamInvoke({ prompt }, onChunk)
+          );
+          response = result.message;
+        } else {
+          const result = await this.queueBedrockRequest(() =>
+            this.bedrockService.invoke({ prompt })
+          );
+          response = result.message;
+        }
+        return response;
+      } catch (bedrockError: any) {
+        console.error('Bedrock error:', bedrockError.message);
+        
+        // Check if it's a rate limit error
+        if (
+          bedrockError.message.includes('Too many requests') ||
+          bedrockError.message.includes('Rate exceeded') ||
+          bedrockError.message.includes('quota')
+        ) {
+          throw new Error(
+            'AI service is currently overloaded. Please wait 30 seconds and try again. ' +
+            'For multiple concurrent users, this is expected due to AWS rate limits.'
+          );
+        }
+        
+        throw bedrockError;
       }
-
-      return response;
     } catch (error: any) {
       console.error('Chat agent error:', error);
       throw new Error(`Failed to process query: ${error.message}`);

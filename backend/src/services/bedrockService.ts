@@ -69,7 +69,7 @@ export class BedrockService {
   async invoke(request: LLMRequest): Promise<LLMResponse> {
     const startTime = Date.now();
     let retries = 0;
-    const maxRetries = 3;
+    const maxRetries = 5; // Increased from 3 to 5
 
     const attemptInvoke = async (): Promise<LLMResponse> => {
       try {
@@ -125,28 +125,52 @@ ${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
       } catch (error: any) {
         const processingTime = Date.now() - startTime;
         const errorMsg = error.message || JSON.stringify(error);
+        const statusCode = error.$metadata?.httpStatusCode;
         
-        // Check if this is a throttling/quota error (429 or token limit)
-        const isThrottled = error.$metadata?.httpStatusCode === 429 || 
-                           errorMsg.includes('Too many tokens') ||
-                           errorMsg.includes('Rate exceeded') ||
-                           errorMsg.includes('quota');
+        // Check if this is a throttling/rate limit error
+        const isRateLimited = statusCode === 429 ||
+                             errorMsg.includes('Rate exceeded') ||
+                             errorMsg.includes('ThrottlingException') ||
+                             errorMsg.includes('request rate');
         
-        if (isThrottled && retries < maxRetries) {
-          const waitTime = Math.pow(2, retries) * 2000; // Exponential backoff: 2s, 4s, 8s
-          debugLog(`⏳ Rate limited/quota exceeded. Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
+        const isTokenLimited = errorMsg.includes('Too many tokens') ||
+                              errorMsg.includes('quota') ||
+                              errorMsg.includes('token limit');
+        
+        // Rate limit: retry aggressively with longer backoff
+        if (isRateLimited && retries < maxRetries) {
+          const waitTime = Math.pow(2, retries) * 3000; // 3s, 6s, 12s, 24s, 48s
+          debugLog(`⚡ Rate limited (HTTP ${statusCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           debugLog(`📝 Error: ${errorMsg}`);
           retries++;
           await new Promise(resolve => setTimeout(resolve, waitTime));
           return attemptInvoke(); // Recursive retry
         }
 
-        // Handle specific quota/token limit errors
-        if (errorMsg.includes('Too many tokens') || errorMsg.includes('quota')) {
-          debugLog(`❌ Token/Quota limit reached. User should wait and retry.`);
+        // Token limit: retry once with longer wait
+        if (isTokenLimited && retries < 1) {
+          const waitTime = 5000; // 5 second wait for tokens
+          debugLog(`🎫 Token/quota limit. Retrying in ${waitTime}ms...`);
+          debugLog(`📝 Error: ${errorMsg}`);
+          retries++;
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          return attemptInvoke();
+        }
+
+        // Handle specific errors with user-friendly messages
+        if (isRateLimited) {
+          debugLog(`❌ Rate limit exceeded after retries`);
           throw new Error(
-            'Too many requests to AI service. Please wait a few minutes and try again. ' +
-            'If this persists, admin should check AWS Bedrock quotas.'
+            'Too many requests to AI service. AWS Bedrock rate limit reached. ' +
+            'Please wait 30 seconds and try again.'
+          );
+        }
+
+        if (isTokenLimited) {
+          debugLog(`❌ Token/Quota limit reached.`);
+          throw new Error(
+            'Too many tokens in your request. Please try with a more specific query. ' +
+            'Try asking about fewer transactions or a specific time period.'
           );
         }
 
@@ -165,7 +189,7 @@ ${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
   ): Promise<LLMResponse> {
     const startTime = Date.now();
     let retries = 0;
-    const maxRetries = 3;
+    const maxRetries = 5; // Increased from 3 to 5
 
     const attemptInvoke = async (): Promise<LLMResponse> => {
       try {
@@ -228,27 +252,52 @@ ${prompt}<|eot_id|><|start_header_id|>assistant<|end_header_id|>`,
       } catch (error: any) {
         const processingTime = Date.now() - startTime;
         const errorMsg = error.message || JSON.stringify(error);
+        const statusCode = error.$metadata?.httpStatusCode;
         
-        // Check if this is a throttling/quota error
-        const isThrottled = error.$metadata?.httpStatusCode === 429 || 
-                           errorMsg.includes('Too many tokens') ||
-                           errorMsg.includes('Rate exceeded') ||
-                           errorMsg.includes('quota');
+        // Check if this is a rate limit error
+        const isRateLimited = statusCode === 429 ||
+                             errorMsg.includes('Rate exceeded') ||
+                             errorMsg.includes('ThrottlingException') ||
+                             errorMsg.includes('request rate');
         
-        if (isThrottled && retries < maxRetries) {
-          const waitTime = Math.pow(2, retries) * 2000; // Exponential backoff: 2s, 4s, 8s
-          debugLog(`⏳ Stream: Rate limited/quota exceeded. Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
+        const isTokenLimited = errorMsg.includes('Too many tokens') ||
+                              errorMsg.includes('quota') ||
+                              errorMsg.includes('token limit');
+        
+        // Rate limit: retry aggressively with longer backoff
+        if (isRateLimited && retries < maxRetries) {
+          const waitTime = Math.pow(2, retries) * 3000; // 3s, 6s, 12s, 24s, 48s
+          debugLog(`⚡ Stream: Rate limited (HTTP ${statusCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           debugLog(`📝 Stream error: ${errorMsg}`);
           retries++;
           await new Promise(resolve => setTimeout(resolve, waitTime));
           return attemptInvoke(); // Recursive retry
         }
 
-        // Handle specific quota/token limit errors
-        if (errorMsg.includes('Too many tokens') || errorMsg.includes('quota')) {
-          debugLog(`❌ Token/Quota limit reached in stream.`);
+        // Token limit: retry once with longer wait
+        if (isTokenLimited && retries < 1) {
+          const waitTime = 5000; // 5 second wait for tokens
+          debugLog(`🎫 Stream: Token/quota limit. Retrying in ${waitTime}ms...`);
+          debugLog(`📝 Stream error: ${errorMsg}`);
+          retries++;
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          return attemptInvoke();
+        }
+
+        // Handle specific errors with user-friendly messages
+        if (isRateLimited) {
+          debugLog(`❌ Stream: Rate limit exceeded after retries`);
           throw new Error(
-            'Too many requests to AI service. Please wait a few minutes and try again.'
+            'Too many requests to AI service. AWS Bedrock rate limit reached. ' +
+            'Please wait 30 seconds and try again.'
+          );
+        }
+
+        if (isTokenLimited) {
+          debugLog(`❌ Stream: Token/Quota limit reached.`);
+          throw new Error(
+            'Too many tokens in your request. Please try with a more specific query. ' +
+            'Try asking about fewer transactions or a specific time period.'
           );
         }
 
