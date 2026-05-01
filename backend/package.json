@@ -21,7 +21,7 @@
   "author": "Ramesh B.",
   "license": "MIT",
   "dependencies": {
-    "@aws-sdk/client-bedrock-runtime": "^3.500.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.1040.0",
     "axios": "^1.6.0",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",

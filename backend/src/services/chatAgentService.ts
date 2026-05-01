@@ -30,11 +30,9 @@ export class ChatAgentService {
       let isAllCustomers = false;
 
       if (customerId.toUpperCase() === 'ALL') {
-        // Fetch all transactions across all customers
         transactions = await this.mongoService.getAllTransactions();
         isAllCustomers = true;
       } else {
-        // Fetch single customer transactions
         transactions = await this.mongoService.getCustomerTransactions(customerId);
       }
 
@@ -42,10 +40,10 @@ export class ChatAgentService {
         return `No tolling transactions found${isAllCustomers ? '' : ` for customer ${customerId}`}.`;
       }
 
-      // Generate prompt for SageMaker
+      // Generate prompt for Bedrock
       const prompt = this.generatePrompt(customerId, transactions, query, isAllCustomers);
 
-      // Call Bedrock
+      // Call Bedrock - NO FALLBACK
       let response: string;
       if (onChunk) {
         const result = await this.bedrockService.streamInvoke(
@@ -65,12 +63,150 @@ export class ChatAgentService {
     }
   }
 
+  private analyzeTransactionsDirectly(
+    customerId: string,
+    transactions: any[],
+    query: string,
+    isAllCustomers: boolean
+  ): string {
+    const queryLower = query.toLowerCase();
+    
+    // Calculate summary statistics from real data
+    const stats = this.calculateStats(transactions);
+
+    // Match user intent and provide data-driven response
+    if (queryLower.includes('total') && queryLower.includes('amount')) {
+      return `The total toll amount ${isAllCustomers ? 'across all customers' : `for customer ${customerId}`} is $${stats.totalAmount.toFixed(2)} across ${transactions.length} transactions.`;
+    } 
+    else if (queryLower.includes('last month')) {
+      const monthStats = this.getMonthStats(transactions);
+      if (monthStats.count === 0) {
+        const now = new Date();
+        return `No tolling transactions found in ${now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}.`;
+      }
+      const now = new Date();
+      return `This month (${now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}), you have ${monthStats.count} toll transactions totaling $${monthStats.total.toFixed(2)}.`;
+    }
+    else if (queryLower.includes('this month')) {
+      const monthStats = this.getMonthStats(transactions);
+      if (monthStats.count === 0) {
+        const now = new Date();
+        return `No tolling transactions in ${now.toLocaleDateString('en-US', { month: 'long' })}.`;
+      }
+      const now = new Date();
+      return `This month (${now.toLocaleDateString('en-US', { month: 'long' })}), you have ${monthStats.count} transactions totaling $${monthStats.total.toFixed(2)}.`;
+    }
+    else if (queryLower.includes('week')) {
+      const weekStats = this.getWeekStats(transactions);
+      if (weekStats.count === 0) {
+        return `No tolling transactions found this week.`;
+      }
+      return `This week, you have ${weekStats.count} toll transactions totaling $${weekStats.total.toFixed(2)}.`;
+    }
+    else if (queryLower.includes('average')) {
+      return `The average toll amount per transaction is $${stats.averageAmount.toFixed(2)}.`;
+    }
+    else if (queryLower.includes('highest') || queryLower.includes('maximum') || queryLower.includes('max')) {
+      return `The highest toll amount is $${stats.maxAmount.toFixed(2)}.`;
+    }
+    else if (queryLower.includes('lowest') || queryLower.includes('minimum') || queryLower.includes('min')) {
+      return `The lowest toll amount is $${stats.minAmount.toFixed(2)}.`;
+    }
+    else if (queryLower.includes('location') || queryLower.includes('point') || queryLower.includes('where')) {
+      const locations = [...new Set(transactions.map((t: any) => t.toll_point_name))];
+      return `Your tolling activity has been recorded at these ${locations.length} locations: ${locations.join(', ')}.`;
+    }
+    else if (queryLower.includes('how many') || queryLower.includes('count') || queryLower.includes('transactions')) {
+      return `You have ${transactions.length} total tolling transactions on record.`;
+    }
+    else if (queryLower.includes('status') || queryLower.includes('error')) {
+      const statuses = this.getStatusBreakdown(transactions);
+      return `Transaction status breakdown: Completed: ${statuses.completed}, Pending: ${statuses.pending}, Error: ${statuses.error}, Incomplete: ${statuses.incomplete}.`;
+    }
+    else if (queryLower.includes('success rate')) {
+      const successCount = transactions.filter((t: any) => t.connection_status).length;
+      const rate = ((successCount / transactions.length) * 100).toFixed(1);
+      return `Your toll transaction success rate is ${rate}% (${successCount}/${transactions.length} successful connections).`;
+    }
+    else {
+      // Default: provide comprehensive summary
+      return `Based on your tolling records: ${transactions.length} total transactions, $${stats.totalAmount.toFixed(2)} total amount spent. Average per transaction: $${stats.averageAmount.toFixed(2)}. Range: $${stats.minAmount.toFixed(2)} - $${stats.maxAmount.toFixed(2)}. Toll locations: ${[...new Set(transactions.map((t: any) => t.toll_point_name))].join(', ')}.`;
+    }
+  }
+
+  private calculateStats(transactions: any[]) {
+    const amounts = transactions
+      .map((t: any) => t.toll_amount || 0)
+      .filter(a => a > 0);
+    
+    const totalAmount = amounts.reduce((a, b) => a + b, 0);
+    const averageAmount = totalAmount / (amounts.length || 1);
+    const maxAmount = Math.max(...amounts, 0);
+    const minAmount = amounts.length > 0 ? Math.min(...amounts) : 0;
+
+    return { totalAmount, averageAmount, maxAmount, minAmount };
+  }
+
+  private getMonthStats(transactions: any[]) {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    const monthTransactions = transactions.filter(t => 
+      new Date(t.tolltime) >= startOfMonth
+    );
+    
+    const total = monthTransactions.reduce(
+      (sum: number, t: any) => sum + (t.toll_amount ? Math.max(t.toll_amount, 0) : 0),
+      0
+    );
+
+    return { count: monthTransactions.length, total };
+  }
+
+  private getWeekStats(transactions: any[]) {
+    const now = new Date();
+    const startOfWeek = new Date(now);
+    startOfWeek.setDate(now.getDate() - now.getDay());
+    
+    const weekTransactions = transactions.filter(t => 
+      new Date(t.tolltime) >= startOfWeek
+    );
+    
+    const total = weekTransactions.reduce(
+      (sum: number, t: any) => sum + (t.toll_amount ? Math.max(t.toll_amount, 0) : 0),
+      0
+    );
+
+    return { count: weekTransactions.length, total };
+  }
+
+  private getStatusBreakdown(transactions: any[]) {
+    const breakdown = {
+      completed: 0,
+      pending: 0,
+      error: 0,
+      incomplete: 0
+    };
+
+    transactions.forEach((t: any) => {
+      const status = (t.tollstatus || '').toLowerCase();
+      if (status === 'completed') breakdown.completed++;
+      else if (status === 'pending') breakdown.pending++;
+      else if (status === 'error') breakdown.error++;
+      else if (status === 'incomplete') breakdown.incomplete++;
+    });
+
+    return breakdown;
+  }
+
   private generatePrompt(
     customerId: string,
     transactions: any[],
     userQuery: string,
     isAllCustomers: boolean = false
   ): string {
+    // Limit to last 50 transactions to drastically reduce tokens
+    const limitedTransactions = transactions.slice(-50);
     const totalTransactions = transactions.length;
     const totalAmount = transactions.reduce(
       (sum: number, t: any) => sum + (t.toll_amount ? Math.max(t.toll_amount, 0) : 0),
@@ -82,129 +218,43 @@ export class ChatAgentService {
     const locations = [...new Set(transactions.map((t: any) => t.toll_point_name))];
 
     if (isAllCustomers) {
-      // Build customer summary for all-customers mode
+      // Build minimal customer summary
       const customerMap: any = {};
       transactions.forEach((t: any) => {
         if (!customerMap[t.customer_id]) {
           customerMap[t.customer_id] = {
-            customer_id: t.customer_id,
             total_amount: 0,
-            transaction_count: 0,
-            max_toll: 0,
-            min_toll: Infinity,
-            status_breakdown: {
-              completed: 0,
-              error: 0,
-              incomplete: 0,
-              pending: 0,
-            },
-            transactions: [],
+            count: 0,
           };
         }
         customerMap[t.customer_id].total_amount += t.toll_amount ? Math.max(t.toll_amount, 0) : 0;
-        customerMap[t.customer_id].transaction_count += 1;
-        
-        // Track status
-        const status = t.tollstatus ? t.tollstatus.toLowerCase() : 'unknown';
-        if (status === 'completed') {
-          customerMap[t.customer_id].status_breakdown.completed += 1;
-        } else if (status === 'error') {
-          customerMap[t.customer_id].status_breakdown.error += 1;
-        } else if (status === 'incomplete') {
-          customerMap[t.customer_id].status_breakdown.incomplete += 1;
-        } else if (status === 'pending') {
-          customerMap[t.customer_id].status_breakdown.pending += 1;
-        }
-        
-        const amount = t.toll_amount ? Math.max(t.toll_amount, 0) : 0;
-        customerMap[t.customer_id].max_toll = Math.max(
-          customerMap[t.customer_id].max_toll,
-          amount
-        );
-        customerMap[t.customer_id].min_toll = Math.min(
-          customerMap[t.customer_id].min_toll,
-          amount
-        );
-        customerMap[t.customer_id].transactions.push(t);
+        customerMap[t.customer_id].count += 1;
       });
 
-      // Sort customers by total amount spent
-      const sortedCustomers = Object.values(customerMap)
-        .sort((a: any, b: any) => b.total_amount - a.total_amount);
+      const topCustomers = Object.entries(customerMap)
+        .sort((a: any, b: any) => b[1].total_amount - a[1].total_amount)
+        .slice(0, 10)
+        .map((entry: any) => `${entry[0]}: $${entry[1].total_amount.toFixed(2)}`)
+        .join(', ');
 
-      const customerSummary = sortedCustomers
-        .map((c: any) => {
-          const minToll = c.min_toll === Infinity ? 0 : c.min_toll;
-          const statusStr = `completed: ${c.status_breakdown.completed}, error: ${c.status_breakdown.error}, incomplete: ${c.status_breakdown.incomplete}, pending: ${c.status_breakdown.pending}`;
-          return `- ${c.customer_id}: $${c.total_amount.toFixed(2)} total (${c.transaction_count} transactions: ${statusStr}, max: $${c.max_toll.toFixed(2)}, min: $${minToll.toFixed(2)})`;
-        })
-        .join('\n');
-
-      const dataContext = `
-ANALYSIS MODE: ALL CUSTOMERS (Cross-Customer Analysis)
-
-Total Customers: ${Object.keys(customerMap).length}
-Total Transactions: ${totalTransactions}
-Total Amount Across All Customers: $${totalAmount.toFixed(2)}
-Overall Average Per Transaction: $${(totalAmount / totalTransactions).toFixed(2)}
-Successful Connections: ${successfulTransactions}/${totalTransactions} (${((successfulTransactions / totalTransactions) * 100).toFixed(1)}%)
-All Toll Locations: ${locations.join(', ')}
-
-TRANSACTION STATUS SUMMARY:
-${(() => {
-  let errorCount = 0, incompleteCount = 0, pendingCount = 0, completedCount = 0;
-  Object.values(customerMap).forEach((c: any) => {
-    errorCount += c.status_breakdown.error;
-    incompleteCount += c.status_breakdown.incomplete;
-    pendingCount += c.status_breakdown.pending;
-    completedCount += c.status_breakdown.completed;
-  });
-  return `- Completed: ${completedCount}
-- Error: ${errorCount}
-- Incomplete: ${incompleteCount}
-- Pending: ${pendingCount}`;
-})()}
-
-CUSTOMER SUMMARY (Sorted by Total Spending):
-${customerSummary}
-
-User Query: ${userQuery}
-
-Based on the customer summary and transaction data above, answer the user's query about cross-customer toll analysis. Provide specific customer IDs and amounts when relevant. When asked about error transactions, carefully count the error statuses for each customer.`;
+      const dataContext = `Customers: ${Object.keys(customerMap).length} | Total: $${totalAmount.toFixed(2)} | Transactions: ${totalTransactions}
+Top customers: ${topCustomers}
+Query: ${userQuery}
+Answer briefly.`;
 
       return dataContext;
     } else {
-      // Original single-customer mode
-      const transactionDetails = transactions
-        .map((t: any) => {
-          const date = new Date(t.tolltime).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-          });
-          const time = new Date(t.tolltime).toLocaleTimeString('en-US', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-          });
-          return `- ${date} at ${time}: ${t.toll_point_name} - $${(t.toll_amount || 0).toFixed(2)}`;
-        })
-        .join('\n');
+      // Single customer - minimal format
+      const recentTxns = limitedTransactions
+        .map((t: any) => `${new Date(t.tolltime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: $${(t.toll_amount || 0).toFixed(2)}`)
+        .join(', ');
 
-      const dataContext = `
-Customer ID: ${customerId}
-Total Transactions: ${totalTransactions}
-Total Amount: $${totalAmount.toFixed(2)}
-Successful Connections: ${successfulTransactions}/${totalTransactions} (${((successfulTransactions / totalTransactions) * 100).toFixed(1)}%)
-Toll Locations: ${locations.join(', ')}
-Date Range: ${new Date(transactions[0].tolltime).toLocaleDateString()} to ${new Date(transactions[transactions.length - 1].tolltime).toLocaleDateString()}
-
-DETAILED TRANSACTION HISTORY:
-${transactionDetails}
-
-User Query: ${userQuery}
-
-Based on the detailed transaction history above, answer the customer's query about their tolling activity. If they ask about a specific date, locate that date in the transaction list and provide the exact amount. For aggregate questions, use the summary statistics provided.`;
+      const dataContext = `Customer: ${customerId}
+Total: $${totalAmount.toFixed(2)} (${totalTransactions} txns)
+Recent: ${recentTxns}
+Locations: ${locations.join(', ')}
+Query: ${userQuery}
+Answer concisely.`;
 
       return dataContext;
     }
