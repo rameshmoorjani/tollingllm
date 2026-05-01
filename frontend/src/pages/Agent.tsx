@@ -68,6 +68,12 @@ function AgentScreen() {
 
     newSocket.on('agent_complete', (data) => {
       console.log('🎯 Agent response complete:', data)
+      
+      // Clear any pending timeout
+      if ((newSocket as any)._queryTimeout) {
+        clearTimeout((newSocket as any)._queryTimeout)
+      }
+
       setMessages((prev) => {
         console.log('📋 Current messages array:', prev)
         const updated = prev.map((msg) => {
@@ -93,9 +99,52 @@ function AgentScreen() {
       console.log('✅ Loading set to false')
     })
 
+    newSocket.on('agent_error', (data) => {
+      console.log('❌ Agent error received:', data)
+      
+      // Clear any pending timeout
+      if ((newSocket as any)._queryTimeout) {
+        clearTimeout((newSocket as any)._queryTimeout)
+      }
+
+      const errorMsg = data.error || 'An error occurred while processing your query'
+      console.error('Agent error:', data)
+      setError(errorMsg)
+      setLoading(false)
+      // Show error in messages
+      setMessages((prev) => {
+        // Replace temp agent message with error message
+        const updated = prev.map((msg) => {
+          if (msg.role === 'agent' && msg.id === 'temp') {
+            return {
+              ...msg,
+              id: Date.now().toString(),
+              message: `❌ Error: ${errorMsg}`,
+              isError: true,
+            }
+          }
+          return msg
+        })
+        // If no temp message was found, add error as new message
+        if (updated.length === prev.length) {
+          return [
+            ...updated,
+            {
+              id: Date.now().toString(),
+              role: 'agent',
+              message: `❌ Error: ${errorMsg}`,
+              timestamp: new Date(),
+              isError: true,
+            },
+          ]
+        }
+        return updated
+      })
+    })
+
     newSocket.on('error', (data) => {
       const errorMsg = data.message || 'An error occurred while processing your query'
-      console.error('Error:', data)
+      console.error('Socket error:', data)
       setError(errorMsg)
       setLoading(false)
       // Show error in messages
@@ -156,6 +205,30 @@ function AgentScreen() {
       customer_id: customerId,
       message: inputValue,
     })
+
+    // Set a timeout in case the server doesn't respond
+    const timeoutId = setTimeout(() => {
+      setLoading(false)
+      const errorMsg = 'Request timeout. The AI service took too long to respond. Try again in a moment.'
+      setError(errorMsg)
+      setMessages((prev) => {
+        const updated = prev.map((msg) => {
+          if (msg.role === 'agent' && msg.id === 'temp') {
+            return {
+              ...msg,
+              id: Date.now().toString(),
+              message: `❌ Error: ${errorMsg}`,
+              isError: true,
+            }
+          }
+          return msg
+        })
+        return updated
+      })
+    }, 120000) // 2 minute timeout
+
+    // Store timeout ID to clear if response comes in
+    (socket as any)._queryTimeout = timeoutId
 
     setInputValue('')
   }
