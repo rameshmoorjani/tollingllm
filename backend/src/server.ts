@@ -19,7 +19,19 @@ const app: Express = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: function(origin, callback) {
+      // Allow all origins in development for easier testing
+      if (process.env.NODE_ENV === 'development') {
+        return callback(null, true);
+      }
+      // In production, check against FRONTEND_URL
+      const allowedOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
+      if (origin === allowedOrigin) {
+        callback(null, true);
+      } else {
+        callback(new Error('CORS not allowed'));
+      }
+    },
     methods: ['GET', 'POST'],
     credentials: true,
   },
