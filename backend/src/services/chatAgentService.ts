@@ -161,16 +161,44 @@ export class ChatAgentService {
       } catch (bedrockError: any) {
         console.error('Bedrock error:', bedrockError.message);
         
-        // Check if it's a rate limit error
-        if (
+        // Check if it's a rate limit/quota error
+        const isRateLimited = 
           bedrockError.message.includes('Too many requests') ||
           bedrockError.message.includes('Rate exceeded') ||
-          bedrockError.message.includes('quota')
-        ) {
-          throw new Error(
-            'AI service is currently overloaded due to AWS rate limits. Please wait 30-60 seconds and try again. ' +
-            'We are caching responses to reduce API calls.'
-          );
+          bedrockError.message.includes('quota') ||
+          bedrockError.message.includes('Too many tokens');
+
+        if (isRateLimited) {
+          // Rate limited: provide quick data analysis fallback
+          console.log('🚨 AWS Bedrock rate limited - using data analysis fallback');
+          try {
+            // Use direct data analysis instead of LLM
+            const fallbackResponse = this.analyzeTransactionsDirectly(
+              customerId,
+              transactions,
+              query,
+              isAllCustomers
+            );
+            
+            // Cache the fallback response too
+            this.setCachedResponse(cacheKey, fallbackResponse);
+            
+            if (onChunk) {
+              // Stream fallback response in chunks
+              const words = fallbackResponse.split(' ');
+              for (const word of words) {
+                onChunk(word + ' ');
+              }
+            }
+            
+            return fallbackResponse;
+          } catch (fallbackError: any) {
+            console.error('Fallback analysis also failed:', fallbackError);
+            throw new Error(
+              'AWS Bedrock quota exceeded and unable to provide response. ' +
+              'Please try again in a few minutes. We are working on increasing quota limits.'
+            );
+          }
         }
         
         throw bedrockError;

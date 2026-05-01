@@ -69,7 +69,7 @@ export class BedrockService {
   async invoke(request: LLMRequest): Promise<LLMResponse> {
     const startTime = Date.now();
     let retries = 0;
-    const maxRetries = 5; // Increased from 3 to 5
+    const maxRetries = 2; // Reduced from 5 to 2 - fail fast, use fallback instead
 
     const attemptInvoke = async (): Promise<LLMResponse> => {
       try {
@@ -138,7 +138,7 @@ export class BedrockService {
         
         // Rate limit: retry aggressively with longer backoff
         if (isRateLimited && retries < maxRetries) {
-          const waitTime = Math.pow(2, retries) * 3000; // 3s, 6s, 12s, 24s, 48s
+          const waitTime = Math.pow(2, retries) * 1000; // 1s, 2s (faster than before)
           debugLog(`⚡ Rate limited (HTTP ${statusCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           debugLog(`📝 Error: ${errorMsg}`);
           retries++;
@@ -188,7 +188,7 @@ export class BedrockService {
   ): Promise<LLMResponse> {
     const startTime = Date.now();
     let retries = 0;
-    const maxRetries = 5; // Increased from 3 to 5
+    const maxRetries = 2; // Reduced from 5 to 2 - fail fast and use fallback
 
     const attemptInvoke = async (): Promise<LLMResponse> => {
       try {
@@ -264,7 +264,7 @@ export class BedrockService {
         
         // Rate limit: retry aggressively with longer backoff
         if (isRateLimited && retries < maxRetries) {
-          const waitTime = Math.pow(2, retries) * 3000; // 3s, 6s, 12s, 24s, 48s
+          const waitTime = Math.pow(2, retries) * 1000; // 1s, 2s (fail fast)
           debugLog(`⚡ Stream: Rate limited (HTTP ${statusCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           debugLog(`📝 Stream error: ${errorMsg}`);
           retries++;
