@@ -206,10 +206,10 @@ function AgentScreen() {
       message: inputValue,
     })
 
-    // Set a timeout in case the server doesn't respond (2 minutes)
+    // Set a timeout in case the server doesn't respond (5 minutes)
     const queryTimeout = window.setTimeout(() => {
       setLoading(false)
-      const errorMsg = 'Request timeout. The AI service took too long to respond. Try again in a moment.'
+      const errorMsg = 'Request timeout. The AI service took too long to respond. Try again later.'
       setError(errorMsg)
       setMessages((prev) => {
         const updated = prev.map((msg) => {
@@ -225,7 +225,7 @@ function AgentScreen() {
         })
         return updated
       })
-    }, 120000)
+    }, 300000) // 5 minute timeout (Bedrock will keep retrying)
 
     // Store timeout ID to clear if response comes in
     if (socket) {

@@ -161,46 +161,7 @@ export class ChatAgentService {
       } catch (bedrockError: any) {
         console.error('Bedrock error:', bedrockError.message);
         
-        // Check if it's a rate limit/quota error
-        const isRateLimited = 
-          bedrockError.message.includes('Too many requests') ||
-          bedrockError.message.includes('Rate exceeded') ||
-          bedrockError.message.includes('quota') ||
-          bedrockError.message.includes('Too many tokens');
-
-        if (isRateLimited) {
-          // Rate limited: provide quick data analysis fallback
-          console.log('🚨 AWS Bedrock rate limited - using data analysis fallback');
-          try {
-            // Use direct data analysis instead of LLM
-            const fallbackResponse = this.analyzeTransactionsDirectly(
-              customerId,
-              transactions,
-              query,
-              isAllCustomers
-            );
-            
-            // Cache the fallback response too
-            this.setCachedResponse(cacheKey, fallbackResponse);
-            
-            if (onChunk) {
-              // Stream fallback response in chunks
-              const words = fallbackResponse.split(' ');
-              for (const word of words) {
-                onChunk(word + ' ');
-              }
-            }
-            
-            return fallbackResponse;
-          } catch (fallbackError: any) {
-            console.error('Fallback analysis also failed:', fallbackError);
-            throw new Error(
-              'AWS Bedrock quota exceeded and unable to provide response. ' +
-              'Please try again in a few minutes. We are working on increasing quota limits.'
-            );
-          }
-        }
-        
+        // Pass through the error - Bedrock service will handle retries
         throw bedrockError;
       }
     } catch (error: any) {
@@ -219,6 +180,38 @@ export class ChatAgentService {
     
     // Calculate summary statistics from real data
     const stats = this.calculateStats(transactions);
+
+    // Check if query mentions a specific toll location
+    const locationMatch = query.match(/(?:Toll|Exit|Mile Marker|Plaza|Bridge|Skyway|Point|Booth)[^.!?]*/gi);
+    if (locationMatch && locationMatch.length > 0) {
+      const mentionedLocation = locationMatch[0].trim();
+      const locationTransactions = transactions.filter((t: any) => 
+        t.toll_point_name.toLowerCase().includes(mentionedLocation.toLowerCase())
+      );
+      
+      if (locationTransactions.length > 0) {
+        if (isAllCustomers) {
+          // Show which customers used this location
+          const customerMap: {[key: string]: number} = {};
+          locationTransactions.forEach((t: any) => {
+            customerMap[t.customer_id] = (customerMap[t.customer_id] || 0) + 1;
+          });
+          const topCustomers = Object.entries(customerMap)
+            .sort((a, b) => (b[1] as number) - (a[1] as number))
+            .map(([cust, count]) => `${cust} (${count} times)`)
+            .join(', ');
+          return `At ${mentionedLocation}, the following customers passed through: ${topCustomers}. Total combined transactions: ${locationTransactions.length}.`;
+        } else {
+          // Show how many times this customer used this location
+          const locationAmount = locationTransactions.reduce((sum: number, t: any) => 
+            sum + (t.toll_amount ? Math.max(t.toll_amount, 0) : 0), 0
+          );
+          return `Customer ${customerId} has crossed ${mentionedLocation} ${locationTransactions.length} times, spending $${locationAmount.toFixed(2)} at this location.`;
+        }
+      } else {
+        return `No transactions found for ${mentionedLocation}. This location may not exist in the records.`;
+      }
+    }
 
     // Match user intent and provide data-driven response
     if (queryLower.includes('total') && queryLower.includes('amount')) {
