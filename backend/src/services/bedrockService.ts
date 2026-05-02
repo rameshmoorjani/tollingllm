@@ -136,9 +136,9 @@ export class BedrockService {
                               errorMsg.includes('quota') ||
                               errorMsg.includes('token limit');
         
-        // Rate limit: retry aggressively with longer backoff
+        // Rate limit: retry aggressively with longer backoff (capped at 15s)
         if (isRateLimited && retries < maxRetries) {
-          const waitTime = Math.pow(2, retries) * 1000; // 1s, 2s (faster than before)
+          const waitTime = Math.min(Math.pow(2, retries) * 1000, 15000); // 1s, 2s, 4s, 8s, 15s (capped)
           debugLog(`⚡ Rate limited (HTTP ${statusCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           debugLog(`📝 Error: ${errorMsg}`);
           retries++;
@@ -146,9 +146,9 @@ export class BedrockService {
           return attemptInvoke(); // Recursive retry
         }
 
-        // Token limit: keep retrying with longer backoff
+        // Token limit: keep retrying with longer backoff (capped at 15s)
         if (isTokenLimited && retries < maxRetries) {
-          const waitTime = Math.pow(2, retries) * 3000; // 3s, 6s, 12s, 24s... longer wait for token limits
+          const waitTime = Math.min(Math.pow(2, retries) * 3000, 15000); // 3s, 6s, 12s, 15s (capped)
           debugLog(`🎫 Token/quota limit. Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           debugLog(`📝 Error: ${errorMsg}`);
           retries++;
@@ -262,9 +262,9 @@ export class BedrockService {
                               errorMsg.includes('quota') ||
                               errorMsg.includes('token limit');
         
-        // Rate limit: retry aggressively with longer backoff
+        // Rate limit: retry aggressively with longer backoff (capped at 15s)
         if (isRateLimited && retries < maxRetries) {
-          const waitTime = Math.pow(2, retries) * 2000; // 2s, 4s, 8s, 16s, 32s... exponential backoff
+          const waitTime = Math.min(Math.pow(2, retries) * 2000, 15000); // 2s, 4s, 8s, 15s (capped)
           debugLog(`⚡ Stream: Rate limited (HTTP ${statusCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           debugLog(`📝 Stream error: ${errorMsg}`);
           retries++;
@@ -272,9 +272,9 @@ export class BedrockService {
           return attemptInvoke(); // Recursive retry
         }
 
-        // Token limit: keep retrying with longer backoff
+        // Token limit: keep retrying with longer backoff (capped at 15s)
         if (isTokenLimited && retries < maxRetries) {
-          const waitTime = Math.pow(2, retries) * 3000; // 3s, 6s, 12s, 24s... longer wait for token limits
+          const waitTime = Math.min(Math.pow(2, retries) * 3000, 15000); // 3s, 6s, 12s, 15s (capped)
           debugLog(`🎫 Stream: Token/quota limit. Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           debugLog(`📝 Stream error: ${errorMsg}`);
           retries++;
