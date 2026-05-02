@@ -152,10 +152,6 @@ export class BedrockService {
           debugLog(`🎫 Token/quota limit. Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           debugLog(`📝 Error: ${errorMsg}`);
           retries++;
-          const waitTime = 5000; // 5 second wait for tokens
-          debugLog(`🎫 Token/quota limit. Retrying in ${waitTime}ms...`);
-          debugLog(`📝 Error: ${errorMsg}`);
-          retries++;
           await new Promise(resolve => setTimeout(resolve, waitTime));
           return attemptInvoke();
         }
