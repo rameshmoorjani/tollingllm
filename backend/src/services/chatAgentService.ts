@@ -425,7 +425,7 @@ export class ChatAgentService {
     });
 
     const monthlyStr = Object.entries(monthlyData)
-      .map((entry: any) => `${entry[0]}: $${entry[1][1].toFixed(2)} (${entry[1][0]} txn)`)
+      .map((entry: any) => `${entry[0]}: $${entry[1].total.toFixed(2)} (${entry[1].count} txn)`)
       .join(' | ');
 
     if (isAllCustomers) {
