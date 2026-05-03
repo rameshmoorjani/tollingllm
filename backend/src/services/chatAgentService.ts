@@ -227,42 +227,13 @@ export class ChatAgentService {
     // Calculate summary statistics from real data
     const stats = this.calculateStats(transactions);
 
-    // Check if query mentions a specific toll location
-    const locationMatch = query.match(/(?:Toll|Exit|Mile Marker|Plaza|Bridge|Skyway|Point|Booth)[^.!?]*/gi);
-    if (locationMatch && locationMatch.length > 0) {
-      const mentionedLocation = locationMatch[0].trim();
-      const locationTransactions = transactions.filter((t: any) => 
-        t.toll_point_name.toLowerCase().includes(mentionedLocation.toLowerCase())
-      );
-      
-      if (locationTransactions.length > 0) {
-        if (isAllCustomers) {
-          // Show which customers used this location
-          const customerMap: {[key: string]: number} = {};
-          locationTransactions.forEach((t: any) => {
-            customerMap[t.customer_id] = (customerMap[t.customer_id] || 0) + 1;
-          });
-          const topCustomers = Object.entries(customerMap)
-            .sort((a, b) => (b[1] as number) - (a[1] as number))
-            .map(([cust, count]) => `${cust} (${count} times)`)
-            .join(', ');
-          return `At ${mentionedLocation}, the following customers passed through: ${topCustomers}. Total combined transactions: ${locationTransactions.length}.`;
-        } else {
-          // Show how many times this customer used this location
-          const locationAmount = locationTransactions.reduce((sum: number, t: any) => 
-            sum + (t.toll_amount ? Math.max(t.toll_amount, 0) : 0), 0
-          );
-          return `Customer ${customerId} has crossed ${mentionedLocation} ${locationTransactions.length} times, spending $${locationAmount.toFixed(2)} at this location.`;
-        }
-      } else {
-        return `No transactions found for ${mentionedLocation}. This location may not exist in the records.`;
-      }
-    }
-
-    // Match user intent and provide data-driven response
+    // CHECK SPECIFIC INTENT PATTERNS FIRST (before broad location matching)
     if (queryLower.includes('total') && queryLower.includes('amount')) {
       return `The total toll amount ${isAllCustomers ? 'across all customers' : `for customer ${customerId}`} is $${stats.totalAmount.toFixed(2)} across ${transactions.length} transactions.`;
     } 
+    else if (queryLower.includes('how many') || queryLower.includes('count') || queryLower.includes('transactions')) {
+      return `You have ${transactions.length} total tolling transactions on record.`;
+    }
     else if (queryLower.includes('last month')) {
       const monthStats = this.getMonthStats(transactions);
       if (monthStats.count === 0) {
@@ -297,13 +268,6 @@ export class ChatAgentService {
     else if (queryLower.includes('lowest') || queryLower.includes('minimum') || queryLower.includes('min')) {
       return `The lowest toll amount is $${stats.minAmount.toFixed(2)}.`;
     }
-    else if (queryLower.includes('location') || queryLower.includes('point') || queryLower.includes('where')) {
-      const locations = [...new Set(transactions.map((t: any) => t.toll_point_name))];
-      return `Your tolling activity has been recorded at these ${locations.length} locations: ${locations.join(', ')}.`;
-    }
-    else if (queryLower.includes('how many') || queryLower.includes('count') || queryLower.includes('transactions')) {
-      return `You have ${transactions.length} total tolling transactions on record.`;
-    }
     else if (queryLower.includes('status') || queryLower.includes('error')) {
       const statuses = this.getStatusBreakdown(transactions);
       return `Transaction status breakdown: Completed: ${statuses.completed}, Pending: ${statuses.pending}, Error: ${statuses.error}, Incomplete: ${statuses.incomplete}.`;
@@ -312,6 +276,43 @@ export class ChatAgentService {
       const successCount = transactions.filter((t: any) => t.connection_status).length;
       const rate = ((successCount / transactions.length) * 100).toFixed(1);
       return `Your toll transaction success rate is ${rate}% (${successCount}/${transactions.length} successful connections).`;
+    }
+
+    // NOW check if query mentions a specific toll location (be more specific with regex pattern)
+    const locationMatch = query.match(/(?:Toll Booth|Exit|Mile Marker|Plaza|Bridge|Skyway|Toll Point|Toll Location|at\s+\w+)[^.!?]*/gi);
+    if (locationMatch && locationMatch.length > 0) {
+      const mentionedLocation = locationMatch[0].trim();
+      const locationTransactions = transactions.filter((t: any) => 
+        t.toll_point_name.toLowerCase().includes(mentionedLocation.toLowerCase())
+      );
+      
+      if (locationTransactions.length > 0) {
+        if (isAllCustomers) {
+          // Show which customers used this location
+          const customerMap: {[key: string]: number} = {};
+          locationTransactions.forEach((t: any) => {
+            customerMap[t.customer_id] = (customerMap[t.customer_id] || 0) + 1;
+          });
+          const topCustomers = Object.entries(customerMap)
+            .sort((a, b) => (b[1] as number) - (a[1] as number))
+            .map(([cust, count]) => `${cust} (${count} times)`)
+            .join(', ');
+          return `At ${mentionedLocation}, the following customers passed through: ${topCustomers}. Total combined transactions: ${locationTransactions.length}.`;
+        } else {
+          // Show how many times this customer used this location
+          const locationAmount = locationTransactions.reduce((sum: number, t: any) => 
+            sum + (t.toll_amount ? Math.max(t.toll_amount, 0) : 0), 0
+          );
+          return `Customer ${customerId} has crossed ${mentionedLocation} ${locationTransactions.length} times, spending $${locationAmount.toFixed(2)} at this location.`;
+        }
+      } else {
+        return `No transactions found for ${mentionedLocation}. This location may not exist in the records.`;
+      }
+    }
+
+    else if (queryLower.includes('location') || queryLower.includes('point') || queryLower.includes('where')) {
+      const locations = [...new Set(transactions.map((t: any) => t.toll_point_name))];
+      return `Your tolling activity has been recorded at these ${locations.length} locations: ${locations.join(', ')}.`;
     }
     else {
       // Default: provide comprehensive summary
