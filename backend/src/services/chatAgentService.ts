@@ -23,7 +23,7 @@ export class ChatAgentService {
   
   // Request queue to prevent rate limiting
   private requestQueue: Promise<any> = Promise.resolve();
-  private minRequestIntervalMs = 1000; // Minimum 1 second between requests
+  private minRequestIntervalMs = 3000; // Increased from 1000 to 3000 (3 seconds) to stay within Mistral TPM limits while quota increases
   private lastRequestTime = 0;
 
   // Response cache to avoid repeated Bedrock calls
@@ -159,14 +159,60 @@ export class ChatAgentService {
 
         return response;
       } catch (bedrockError: any) {
-        console.error('Bedrock error:', bedrockError.message);
+        const errorMsg = bedrockError.message || JSON.stringify(bedrockError);
+        console.error('Bedrock error:', errorMsg);
         
-        // Pass through the error - Bedrock service will handle retries
+        // Check if this is a rate limit or quota error
+        const isQuotaExhausted = 
+          errorMsg.includes('Too many tokens') ||
+          errorMsg.includes('quota') ||
+          errorMsg.includes('Rate limit') ||
+          errorMsg.includes('Too many requests') ||
+          errorMsg.includes('ThrottlingException');
+        
+        // If Bedrock is down due to quota/rate limiting, use data analysis fallback
+        if (isQuotaExhausted) {
+          console.log('⚠️  Bedrock service unavailable, switching to data analysis mode...');
+          
+          const fallbackResponse = this.analyzeTransactionsDirectly(
+            customerId,
+            transactions,
+            query,
+            isAllCustomers
+          );
+          
+          // Add notice that this is from fallback
+          const response = `[AI Service Status: Using data analysis mode due to service limits]\n\n${fallbackResponse}`;
+          
+          // Cache this fallback response too
+          this.setCachedResponse(cacheKey, response);
+          
+          if (onChunk) {
+            // Stream the fallback response
+            const words = response.split(' ');
+            for (const word of words) {
+              onChunk(word + ' ');
+            }
+          }
+          
+          return response;
+        }
+        
+        // For other errors, throw them
         throw bedrockError;
       }
     } catch (error: any) {
-      console.error('Chat agent error:', error);
-      throw new Error(`Failed to process query: ${error.message}`);
+      const errorMsg = error.message || JSON.stringify(error);
+      console.error('Chat agent error:', errorMsg);
+      
+      // Check if this is a quota-related error that we couldn't handle
+      if (errorMsg.includes('Too many tokens') || 
+          errorMsg.includes('Rate limit') || 
+          errorMsg.includes('ThrottlingException')) {
+        throw new Error(`AI service temporarily unavailable. Please try again in 30 seconds. Details: ${errorMsg}`);
+      }
+      
+      throw new Error(`Failed to process query: ${errorMsg}`);
     }
   }
 
@@ -344,8 +390,8 @@ export class ChatAgentService {
     userQuery: string,
     isAllCustomers: boolean = false
   ): string {
-    // Limit to last 50 transactions to drastically reduce tokens
-    const limitedTransactions = transactions.slice(-50);
+    // Limit to last 20 transactions (not 50) to drastically reduce tokens for TPM limit
+    const limitedTransactions = transactions.slice(-20);
     const totalTransactions = transactions.length;
     const totalAmount = transactions.reduce(
       (sum: number, t: any) => sum + (t.toll_amount ? Math.max(t.toll_amount, 0) : 0),
@@ -357,7 +403,7 @@ export class ChatAgentService {
     const locations = [...new Set(transactions.map((t: any) => t.toll_point_name))];
 
     if (isAllCustomers) {
-      // Build minimal customer summary
+      // Build ultra-minimal customer summary
       const customerMap: any = {};
       transactions.forEach((t: any) => {
         if (!customerMap[t.customer_id]) {
@@ -372,28 +418,30 @@ export class ChatAgentService {
 
       const topCustomers = Object.entries(customerMap)
         .sort((a: any, b: any) => b[1].total_amount - a[1].total_amount)
-        .slice(0, 10)
+        .slice(0, 5)  // Reduced from 10 to 5
         .map((entry: any) => `${entry[0]}: $${entry[1].total_amount.toFixed(2)}`)
-        .join(', ');
+        .join('; ');
 
-      const dataContext = `Customers: ${Object.keys(customerMap).length} | Total: $${totalAmount.toFixed(2)} | Transactions: ${totalTransactions}
-Top customers: ${topCustomers}
-Query: ${userQuery}
-Answer briefly.`;
+      // Ultra-compact format to minimize tokens
+      const dataContext = `CUSTOMERS: ${Object.keys(customerMap).length}, TOTAL: $${totalAmount.toFixed(2)}, TXN: ${totalTransactions}
+TOP: ${topCustomers}
+Q: ${userQuery}
+Answer in 1-2 sentences.`;
 
       return dataContext;
     } else {
-      // Single customer - minimal format
+      // Single customer - ultra-minimal format
       const recentTxns = limitedTransactions
-        .map((t: any) => `${new Date(t.tolltime).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: $${(t.toll_amount || 0).toFixed(2)}`)
+        .map((t: any) => `$${(t.toll_amount || 0).toFixed(2)}`)
         .join(', ');
 
-      const dataContext = `Customer: ${customerId}
-Total: $${totalAmount.toFixed(2)} (${totalTransactions} txns)
-Recent: ${recentTxns}
-Locations: ${locations.join(', ')}
-Query: ${userQuery}
-Answer concisely.`;
+      // Ultra-compact format to minimize tokens
+      const dataContext = `CUST: ${customerId}
+TOTAL: $${totalAmount.toFixed(2)} (${totalTransactions} TXN)
+RECENT: ${recentTxns}
+LOCS: ${locations.join('; ')}
+Q: ${userQuery}
+ANSWER in 1-2 sentences.`;
 
       return dataContext;
     }

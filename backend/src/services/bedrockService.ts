@@ -55,15 +55,16 @@ export class BedrockService {
 
   constructor() {
     const region = process.env.AWS_REGION || 'us-east-1';
-    const modelId = process.env.BEDROCK_MODEL || 'meta.llama3-8b-instruct-v1:0';
+    // Using Mistral Pixtral Large 25.02 - has 80K TPM available in cross-region
+    const modelId = process.env.BEDROCK_MODEL || 'mistral.pixtral-large-2502-v1:0';
 
     this.client = new BedrockRuntimeClient({ region });
     this.modelId = modelId;
 
     debugLog(`🤖 AWS Bedrock Service initialized`);
     debugLog(`📍 Region: ${region}`);
-    debugLog(`📊 Model: ${this.modelId}`);
-    debugLog(`💡 Expected response time: <1 second`);
+    debugLog(`📊 Model: ${this.modelId} (Pixtral Large with 80K TPM available)`);
+    debugLog(`💡 Expected response time: ~1-2 seconds`);
   }
 
   async invoke(request: LLMRequest): Promise<LLMResponse> {
@@ -80,7 +81,7 @@ export class BedrockService {
         debugLog(`📤 Calling Bedrock with model: ${this.modelId} (attempt ${retries + 1}/${maxRetries + 1})`);
         debugLog(`📝 Prompt length: ${prompt.length} chars`);
 
-        // Prepare payload for Mistral model (faster, better rate limits)
+        // Prepare payload for Mistral model with optimized token usage
         const payload = {
           prompt: `[INST] ${prompt} [/INST]`,
           max_tokens: maxTokens,
@@ -104,7 +105,7 @@ export class BedrockService {
         const responseBody = JSON.parse(responseText);
         debugLog(`📦 Parsed response body: ${JSON.stringify(responseBody).substring(0, 300)}`);
         
-        // Mistral returns text in different format than Llama
+        // Mistral returns text in outputs array
         const message = responseBody.outputs?.[0]?.text || responseBody.generation || responseBody.output?.text || '';
         debugLog(`💬 Extracted message length: ${message.length}`);
 
@@ -206,7 +207,7 @@ export class BedrockService {
         debugLog(`📝 Stream: Prompt length: ${prompt.length} chars`);
 
         // For streaming with Bedrock, we'll use regular invoke and split response
-        // since streaming requires a different API approach
+        // Mistral format
         const payload = {
           prompt: `[INST] ${prompt} [/INST]`,
           max_tokens: maxTokens,
@@ -230,7 +231,7 @@ export class BedrockService {
         const responseBody = JSON.parse(responseText);
         debugLog(`📦 Stream: Parsed response body keys: ${Object.keys(responseBody).join(', ')}`);
 
-        // Mistral returns text in different format than Llama
+        // Mistral returns text in outputs array
         const fullMessage = responseBody.outputs?.[0]?.text || responseBody.generation || '';
         debugLog(`💬 Stream: Extracted message length: ${fullMessage.length}`);
 
