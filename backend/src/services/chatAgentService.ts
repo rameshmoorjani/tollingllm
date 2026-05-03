@@ -277,6 +277,40 @@ export class ChatAgentService {
       const rate = ((successCount / transactions.length) * 100).toFixed(1);
       return `Your toll transaction success rate is ${rate}% (${successCount}/${transactions.length} successful connections).`;
     }
+    else if ((queryLower.includes('which') || queryLower.includes('who')) && (queryLower.includes('customer') || queryLower.includes('paid'))) {
+      // Analyze which customer paid the most or least
+      const customerMap: any = {};
+      transactions.forEach((t: any) => {
+        if (!customerMap[t.customer_id]) {
+          customerMap[t.customer_id] = {
+            total_amount: 0,
+            count: 0,
+            min: Infinity,
+            max: -Infinity,
+          };
+        }
+        const amount = t.toll_amount ? Math.max(t.toll_amount, 0) : 0;
+        customerMap[t.customer_id].total_amount += amount;
+        customerMap[t.customer_id].count += 1;
+        customerMap[t.customer_id].min = Math.min(customerMap[t.customer_id].min, amount);
+        customerMap[t.customer_id].max = Math.max(customerMap[t.customer_id].max, amount);
+      });
+      
+      if (queryLower.includes('most') || queryLower.includes('highest') || queryLower.includes('highest')) {
+        const topCustomer = Object.entries(customerMap)
+          .sort((a: any, b: any) => b[1].total_amount - a[1].total_amount)[0];
+        const [custId, custData] = topCustomer as any;
+        return `The customer who paid the most is ${custId} with a total of $${custData.total_amount.toFixed(2)} spent across ${custData.count} transactions (avg: $${(custData.total_amount / custData.count).toFixed(2)} per transaction).`;
+      } else {
+        // Default to showing top customers
+        const topCustomers = Object.entries(customerMap)
+          .sort((a: any, b: any) => b[1].total_amount - a[1].total_amount)
+          .slice(0, 3)
+          .map((entry: any) => `${entry[0]}: $${entry[1].total_amount.toFixed(2)} (${entry[1].count} txn)`)
+          .join('; ');
+        return `Top customers by toll spending: ${topCustomers}.`;
+      }
+    }
 
     // NOW check if query mentions a specific toll location (be more specific with regex pattern)
     const locationMatch = query.match(/(?:Toll Booth|Exit|Mile Marker|Plaza|Bridge|Skyway|Toll Point|Toll Location|at\s+\w+)[^.!?]*/gi);
