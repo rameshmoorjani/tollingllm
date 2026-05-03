@@ -55,7 +55,7 @@ export class BedrockService {
 
   constructor() {
     const region = process.env.AWS_REGION || 'us-east-1';
-    const modelId = process.env.BEDROCK_MODEL || 'anthropic.claude-3-haiku-20240307-v1:0';
+    const modelId = process.env.BEDROCK_MODEL || 'meta.llama3-8b-instruct-v1:0';
 
     this.client = new BedrockRuntimeClient({ region });
     this.modelId = modelId;
@@ -80,17 +80,12 @@ export class BedrockService {
         debugLog(`📤 Calling Bedrock with model: ${this.modelId} (attempt ${retries + 1}/${maxRetries + 1})`);
         debugLog(`📝 Prompt length: ${prompt.length} chars`);
 
-        // Claude 3 uses Messages API format
+        // Llama 3 uses simple text generation format
         const payload = {
-          anthropic_version: 'bedrock-2023-06-01',
-          max_tokens: maxTokens,
+          prompt: prompt,
+          max_gen_len: maxTokens,
           temperature,
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
+          top_p: 0.9,
         };
 
         const command = new InvokeModelCommand({
@@ -109,11 +104,8 @@ export class BedrockService {
         const responseBody = JSON.parse(responseText);
         debugLog(`📦 Parsed response body: ${JSON.stringify(responseBody).substring(0, 300)}`);
         
-        // Claude 3 returns text in content array
-        let message = '';
-        if (responseBody.content && Array.isArray(responseBody.content)) {
-          message = responseBody.content[0]?.text || '';
-        }
+        // Llama 3 returns text in generation field
+        let message = responseBody.generation || '';
         
         debugLog(`💬 Extracted message length: ${message.length}`);
 
@@ -214,17 +206,12 @@ export class BedrockService {
         debugLog(`📤 Stream: Calling Bedrock with model: ${this.modelId} (attempt ${retries + 1}/${maxRetries + 1})`);
         debugLog(`📝 Stream: Prompt length: ${prompt.length} chars`);
 
-        // Claude 3 uses Messages API format
+        // Llama 3 uses simple text generation format
         const payload = {
-          anthropic_version: 'bedrock-2023-06-01',
-          max_tokens: maxTokens,
+          prompt: prompt,
+          max_gen_len: maxTokens,
           temperature,
-          messages: [
-            {
-              role: 'user',
-              content: prompt,
-            },
-          ],
+          top_p: 0.9,
         };
 
         const command = new InvokeModelCommand({
@@ -243,11 +230,8 @@ export class BedrockService {
         const responseBody = JSON.parse(responseText);
         debugLog(`📦 Stream: Parsed response body keys: ${Object.keys(responseBody).join(', ')}`);
 
-        // Claude 3 returns text in content array
-        let fullMessage = '';
-        if (responseBody.content && Array.isArray(responseBody.content)) {
-          fullMessage = responseBody.content[0]?.text || '';
-        }
+        // Llama 3 returns text in generation field
+        let fullMessage = responseBody.generation || '';
         debugLog(`💬 Stream: Extracted message length: ${fullMessage.length}`);
 
         if (!fullMessage) {
