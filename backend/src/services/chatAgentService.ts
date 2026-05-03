@@ -41,8 +41,8 @@ export class ChatAgentService {
   /**
    * Generate a cache key from customer ID, query, and transaction count
    */
-  private getCacheKey(customerId: string, query: string, transactionCount?: number): string {
-    const keyData = `${customerId}:${query}:${transactionCount || 'any'}`;
+  private getCacheKey(customerId: string, query: string): string {
+    const keyData = `${customerId}:${query}`;
     return crypto.createHash('md5').update(keyData).digest('hex');
   }
 
@@ -278,6 +278,28 @@ export class ChatAgentService {
     }
     else if (queryLower.includes('average')) {
       return `The average toll amount per transaction is $${stats.averageAmount.toFixed(2)}.`;
+    }
+    // CHECK LOCATION + HIGHEST/LOWEST PATTERNS BEFORE GENERAL HIGHEST/LOWEST
+    else if ((queryLower.includes('location') || queryLower.includes('point') || queryLower.includes('where')) && 
+             (queryLower.includes('most') || queryLower.includes('highest') || queryLower.includes('expensive'))) {
+      // Find location with most toll spending
+      const locationMap: any = {};
+      transactions.forEach((t: any) => {
+        const loc = t.toll_point_name;
+        if (!locationMap[loc]) {
+          locationMap[loc] = { total: 0, count: 0, min: Infinity, max: -Infinity };
+        }
+        const amount = t.toll_amount ? Math.max(t.toll_amount, 0) : 0;
+        locationMap[loc].total += amount;
+        locationMap[loc].count += 1;
+        locationMap[loc].min = Math.min(locationMap[loc].min, amount);
+        locationMap[loc].max = Math.max(locationMap[loc].max, amount);
+      });
+      
+      const topLocation = Object.entries(locationMap)
+        .sort((a: any, b: any) => b[1].total - a[1].total)[0];
+      const [locName, locData] = topLocation as any;
+      return `The location where you have paid the most toll is ${locName} with a total of $${locData.total.toFixed(2)} across ${locData.count} transactions (range: $${locData.min.toFixed(2)} - $${locData.max.toFixed(2)}).`;
     }
     else if (queryLower.includes('highest') || queryLower.includes('maximum') || queryLower.includes('max')) {
       return `The highest toll amount is $${stats.maxAmount.toFixed(2)}.`;
