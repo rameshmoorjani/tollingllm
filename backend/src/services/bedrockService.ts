@@ -55,15 +55,14 @@ export class BedrockService {
 
   constructor() {
     const region = process.env.AWS_REGION || 'us-east-1';
-    // Using Mistral Pixtral Large 25.02 - has 80K TPM available in cross-region
-    const modelId = process.env.BEDROCK_MODEL || 'mistral.pixtral-large-2502-v1:0';
+    const modelId = process.env.BEDROCK_MODEL || 'anthropic.claude-3-haiku-20240307-v1:0';
 
     this.client = new BedrockRuntimeClient({ region });
     this.modelId = modelId;
 
     debugLog(`🤖 AWS Bedrock Service initialized`);
     debugLog(`📍 Region: ${region}`);
-    debugLog(`📊 Model: ${this.modelId} (Pixtral Large with 80K TPM available)`);
+    debugLog(`📊 Model: ${this.modelId}`);
     debugLog(`💡 Expected response time: ~1-2 seconds`);
   }
 
@@ -81,12 +80,17 @@ export class BedrockService {
         debugLog(`📤 Calling Bedrock with model: ${this.modelId} (attempt ${retries + 1}/${maxRetries + 1})`);
         debugLog(`📝 Prompt length: ${prompt.length} chars`);
 
-        // Prepare payload for Mistral model with optimized token usage
+        // Claude 3 uses Messages API format
         const payload = {
-          prompt: `[INST] ${prompt} [/INST]`,
+          anthropic_version: 'bedrock-2023-06-01',
           max_tokens: maxTokens,
           temperature,
-          top_p: 0.9,
+          messages: [
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
         };
 
         const command = new InvokeModelCommand({
@@ -105,8 +109,12 @@ export class BedrockService {
         const responseBody = JSON.parse(responseText);
         debugLog(`📦 Parsed response body: ${JSON.stringify(responseBody).substring(0, 300)}`);
         
-        // Mistral returns text in outputs array
-        const message = responseBody.outputs?.[0]?.text || responseBody.generation || responseBody.output?.text || '';
+        // Claude 3 returns text in content array
+        let message = '';
+        if (responseBody.content && Array.isArray(responseBody.content)) {
+          message = responseBody.content[0]?.text || '';
+        }
+        
         debugLog(`💬 Extracted message length: ${message.length}`);
 
         if (!message) {
@@ -206,13 +214,17 @@ export class BedrockService {
         debugLog(`📤 Stream: Calling Bedrock with model: ${this.modelId} (attempt ${retries + 1}/${maxRetries + 1})`);
         debugLog(`📝 Stream: Prompt length: ${prompt.length} chars`);
 
-        // For streaming with Bedrock, we'll use regular invoke and split response
-        // Mistral format
+        // Claude 3 uses Messages API format
         const payload = {
-          prompt: `[INST] ${prompt} [/INST]`,
+          anthropic_version: 'bedrock-2023-06-01',
           max_tokens: maxTokens,
           temperature,
-          top_p: 0.9,
+          messages: [
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
         };
 
         const command = new InvokeModelCommand({
@@ -231,8 +243,11 @@ export class BedrockService {
         const responseBody = JSON.parse(responseText);
         debugLog(`📦 Stream: Parsed response body keys: ${Object.keys(responseBody).join(', ')}`);
 
-        // Mistral returns text in outputs array
-        const fullMessage = responseBody.outputs?.[0]?.text || responseBody.generation || '';
+        // Claude 3 returns text in content array
+        let fullMessage = '';
+        if (responseBody.content && Array.isArray(responseBody.content)) {
+          fullMessage = responseBody.content[0]?.text || '';
+        }
         debugLog(`💬 Stream: Extracted message length: ${fullMessage.length}`);
 
         if (!fullMessage) {
