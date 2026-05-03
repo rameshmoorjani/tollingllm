@@ -35,7 +35,7 @@ services:
       AWS_REGION: ${AWS_REGION:-us-east-1}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-      BEDROCK_MODEL: ${BEDROCK_MODEL:-meta.llama3-8b-instruct-v1:0}
+      BEDROCK_MODEL: ${BEDROCK_MODEL:-mistral.pixtral-large-2502-v1:0}
       API_PORT: 5000
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
     ports:
