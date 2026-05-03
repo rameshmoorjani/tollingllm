@@ -69,7 +69,7 @@ export class BedrockService {
   async invoke(request: LLMRequest): Promise<LLMResponse> {
     const startTime = Date.now();
     let retries = 0;
-    const maxRetries = 15; // Keep trying for longer (up to ~2 minutes)
+    const maxRetries = 0; // No retries to conserve tokens during quota exhaustion
 
     const attemptInvoke = async (): Promise<LLMResponse> => {
       try {
@@ -188,7 +188,7 @@ export class BedrockService {
   ): Promise<LLMResponse> {
     const startTime = Date.now();
     let retries = 0;
-    const maxRetries = 15; // Keep trying indefinitely (up to ~2 minutes)
+    const maxRetries = 0; // No retries to conserve tokens during quota exhaustion
 
     const attemptInvoke = async (): Promise<LLMResponse> => {
       try {
