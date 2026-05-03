@@ -402,6 +402,32 @@ export class ChatAgentService {
     ).length;
     const locations = [...new Set(transactions.map((t: any) => t.toll_point_name))];
 
+    // Calculate date range for context
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const earliestDate = transactions.length > 0 
+      ? new Date(transactions[0].tolltime).toISOString().split('T')[0]
+      : todayStr;
+    const latestDate = transactions.length > 0 
+      ? new Date(transactions[transactions.length - 1].tolltime).toISOString().split('T')[0]
+      : todayStr;
+
+    // Calculate monthly breakdown
+    const monthlyData: any = {};
+    transactions.forEach((t: any) => {
+      const date = new Date(t.tolltime);
+      const monthKey = date.toISOString().slice(0, 7); // YYYY-MM
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = { count: 0, total: 0 };
+      }
+      monthlyData[monthKey].count += 1;
+      monthlyData[monthKey].total += t.toll_amount ? Math.max(t.toll_amount, 0) : 0;
+    });
+
+    const monthlyStr = Object.entries(monthlyData)
+      .map((entry: any) => `${entry[0]}: $${entry[1][1].toFixed(2)} (${entry[1][0]} txn)`)
+      .join(' | ');
+
     if (isAllCustomers) {
       // Build ultra-minimal customer summary
       const customerMap: any = {};
@@ -422,26 +448,34 @@ export class ChatAgentService {
         .map((entry: any) => `${entry[0]}: $${entry[1].total_amount.toFixed(2)}`)
         .join('; ');
 
-      // Ultra-compact format to minimize tokens
-      const dataContext = `CUSTOMERS: ${Object.keys(customerMap).length}, TOTAL: $${totalAmount.toFixed(2)}, TXN: ${totalTransactions}
+      // Enhanced format with date context
+      const dataContext = `TODAY: ${todayStr}
+CUSTOMERS: ${Object.keys(customerMap).length}, TOTAL: $${totalAmount.toFixed(2)}, TXN: ${totalTransactions}
+MONTHLY: ${monthlyStr}
 TOP: ${topCustomers}
 Q: ${userQuery}
 Answer in 1-2 sentences.`;
 
       return dataContext;
     } else {
-      // Single customer - ultra-minimal format
+      // Single customer - improved format with dates
       const recentTxns = limitedTransactions
-        .map((t: any) => `$${(t.toll_amount || 0).toFixed(2)}`)
-        .join(', ');
+        .map((t: any) => {
+          const date = new Date(t.tolltime).toISOString().split('T')[0];
+          return `${date}: $${(t.toll_amount || 0).toFixed(2)}`;
+        })
+        .join(' | ');
 
-      // Ultra-compact format to minimize tokens
-      const dataContext = `CUST: ${customerId}
+      // Enhanced format with date context
+      const dataContext = `TODAY: ${todayStr}
+CUST: ${customerId}
+DATA RANGE: ${earliestDate} to ${latestDate}
+MONTHLY: ${monthlyStr}
 TOTAL: $${totalAmount.toFixed(2)} (${totalTransactions} TXN)
 RECENT: ${recentTxns}
 LOCS: ${locations.join('; ')}
 Q: ${userQuery}
-ANSWER in 1-2 sentences.`;
+ANSWER in 1-2 sentences. If asked about specific months, reference MONTHLY data above.`;
 
       return dataContext;
     }
