@@ -161,4 +161,10 @@ export class MongoDBService {
     if (!this.collection) return { insertedCount: 0 };
     return this.collection.insertMany(transactions);
   }
+
+  async aggregateTransactions(pipeline: any[]): Promise<any[]> {
+    await this.connect();
+    if (!this.collection) return [];
+    return this.collection.aggregate(pipeline).toArray();
+  }
 }

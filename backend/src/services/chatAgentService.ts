@@ -1,5 +1,6 @@
 import { MongoDBService } from './mongodbService';
 import { BedrockService } from './bedrockService';
+import { QueryGenerationService } from './queryGenerationService';
 import crypto from 'crypto';
 
 interface Transaction {
@@ -20,6 +21,7 @@ interface CacheEntry {
 export class ChatAgentService {
   private mongoService: MongoDBService;
   private bedrockService: BedrockService;
+  private queryGenerator: QueryGenerationService;
   
   // Request queue to prevent rate limiting
   private requestQueue: Promise<any> = Promise.resolve();
@@ -33,13 +35,14 @@ export class ChatAgentService {
   constructor() {
     this.mongoService = new MongoDBService();
     this.bedrockService = new BedrockService();
+    this.queryGenerator = new QueryGenerationService();
   }
 
   /**
    * Generate a cache key from customer ID, query, and transaction count
    */
-  private getCacheKey(customerId: string, query: string, transactionCount: number): string {
-    const keyData = `${customerId}:${query}:${transactionCount}`;
+  private getCacheKey(customerId: string, query: string, transactionCount?: number): string {
+    const keyData = `${customerId}:${query}:${transactionCount || 'any'}`;
     return crypto.createHash('md5').update(keyData).digest('hex');
   }
 
@@ -107,23 +110,8 @@ export class ChatAgentService {
     onChunk?: (chunk: string) => void
   ): Promise<string> {
     try {
-      // Fetch transactions
-      let transactions: any[];
-      let isAllCustomers = false;
-
-      if (customerId.toUpperCase() === 'ALL') {
-        transactions = await this.mongoService.getAllTransactions();
-        isAllCustomers = true;
-      } else {
-        transactions = await this.mongoService.getCustomerTransactions(customerId);
-      }
-
-      if (transactions.length === 0) {
-        return `No tolling transactions found${isAllCustomers ? '' : ` for customer ${customerId}`}.`;
-      }
-
-      // Check cache first (avoid Bedrock call if we have a recent response)
-      const cacheKey = this.getCacheKey(customerId, query, transactions.length);
+      // Check cache first (quick lookup before generating queries)
+      const cacheKey = this.getCacheKey(customerId, query);
       const cachedResponse = this.getCachedResponse(cacheKey);
       if (cachedResponse) {
         if (onChunk) {
@@ -136,59 +124,58 @@ export class ChatAgentService {
         return cachedResponse;
       }
 
-      // Generate prompt for Bedrock
-      const prompt = this.generatePrompt(customerId, transactions, query, isAllCustomers);
-
-      // Queue Bedrock request to prevent rate limiting
+      // Determine scope: all customers or specific customer
+      const isAllCustomers = customerId.toUpperCase() === 'ALL';
+      
+      // APPROACH 1: Try Intelligent Query Generation (LLM-generated MongoDB queries)
       try {
-        let response: string;
-        if (onChunk) {
-          const result = await this.queueBedrockRequest(() =>
-            this.bedrockService.streamInvoke({ prompt }, onChunk)
-          );
-          response = result.message;
+        console.log(`[Query Generation] Processing: "${query}" for ${isAllCustomers ? 'all customers' : `customer ${customerId}`}`);
+        
+        // Get schema description for LLM
+        const schema = this.queryGenerator.getSchemaDescription();
+        
+        // Generate MongoDB query using LLM
+        const generatedQueryStr = await this.queryGenerator.generateQuery(query, schema);
+        console.log(`[Query Generation] Generated query: ${generatedQueryStr}`);
+        
+        // Parse and validate the generated query
+        const generatedPipeline = JSON.parse(generatedQueryStr);
+        
+        // Execute the generated query
+        let results: any[];
+        if (isAllCustomers) {
+          results = await this.mongoService.aggregateTransactions(generatedPipeline);
         } else {
-          const result = await this.queueBedrockRequest(() =>
-            this.bedrockService.invoke({ prompt })
-          );
-          response = result.message;
+          // Add customer filter to the pipeline for specific customer queries
+          const customerFilteredPipeline = [
+            { $match: { customer_id: customerId } },
+            ...generatedPipeline
+          ];
+          results = await this.mongoService.aggregateTransactions(customerFilteredPipeline);
         }
-
-        // Cache the response for future use
-        this.setCachedResponse(cacheKey, response);
-
-        return response;
-      } catch (bedrockError: any) {
-        const errorMsg = bedrockError.message || JSON.stringify(bedrockError);
-        console.error('Bedrock error:', errorMsg);
         
-        // Check if this is a rate limit or quota error
-        const isQuotaExhausted = 
-          errorMsg.includes('Too many tokens') ||
-          errorMsg.includes('quota') ||
-          errorMsg.includes('Rate limit') ||
-          errorMsg.includes('Too many requests') ||
-          errorMsg.includes('ThrottlingException');
-        
-        // If Bedrock is down due to quota/rate limiting, use data analysis fallback
-        if (isQuotaExhausted) {
-          console.log('⚠️  Bedrock service unavailable, switching to data analysis mode...');
+        // If we got results, explain them using LLM
+        if (results && results.length > 0) {
+          const explanation = await this.queryGenerator.explainResults(query, results);
           
-          const fallbackResponse = this.analyzeTransactionsDirectly(
-            customerId,
-            transactions,
-            query,
-            isAllCustomers
-          );
-          
-          // Add notice that this is from fallback
-          const response = `[AI Service Status: Using data analysis mode due to service limits]\n\n${fallbackResponse}`;
-          
-          // Cache this fallback response too
+          // Cache and return the response
+          const response = explanation;
           this.setCachedResponse(cacheKey, response);
           
           if (onChunk) {
-            // Stream the fallback response
+            const words = response.split(' ');
+            for (const word of words) {
+              onChunk(word + ' ');
+            }
+          }
+          
+          return response;
+        } else {
+          // Query executed but returned no results
+          const response = `No results found matching your query: "${query}". Please try rephrasing your question.`;
+          this.setCachedResponse(cacheKey, response);
+          
+          if (onChunk) {
             const words = response.split(' ');
             for (const word of words) {
               onChunk(word + ' ');
@@ -197,9 +184,39 @@ export class ChatAgentService {
           
           return response;
         }
+      } catch (queryGenError: any) {
+        console.warn('[Query Generation] Failed, falling back to fallback analyzer:', queryGenError.message);
         
-        // For other errors, throw them
-        throw bedrockError;
+        // FALLBACK: Use hardcoded pattern analyzer if query generation fails
+        let transactions: any[];
+        if (isAllCustomers) {
+          transactions = await this.mongoService.getAllTransactions();
+        } else {
+          transactions = await this.mongoService.getCustomerTransactions(customerId);
+        }
+        
+        if (transactions.length === 0) {
+          return `No tolling transactions found${isAllCustomers ? '' : ` for customer ${customerId}`}.`;
+        }
+        
+        const fallbackResponse = this.analyzeTransactionsDirectly(
+          customerId,
+          transactions,
+          query,
+          isAllCustomers
+        );
+        
+        const response = `[Using fallback analysis] ${fallbackResponse}`;
+        this.setCachedResponse(cacheKey, response);
+        
+        if (onChunk) {
+          const words = response.split(' ');
+          for (const word of words) {
+            onChunk(word + ' ');
+          }
+        }
+        
+        return response;
       }
     } catch (error: any) {
       const errorMsg = error.message || JSON.stringify(error);
@@ -344,6 +361,27 @@ export class ChatAgentService {
       }
     }
 
+    else if ((queryLower.includes('location') || queryLower.includes('point') || queryLower.includes('where')) && 
+             (queryLower.includes('most') || queryLower.includes('highest') || queryLower.includes('expensive'))) {
+      // Find location with most toll spending
+      const locationMap: any = {};
+      transactions.forEach((t: any) => {
+        const loc = t.toll_point_name;
+        if (!locationMap[loc]) {
+          locationMap[loc] = { total: 0, count: 0, min: Infinity, max: -Infinity };
+        }
+        const amount = t.toll_amount ? Math.max(t.toll_amount, 0) : 0;
+        locationMap[loc].total += amount;
+        locationMap[loc].count += 1;
+        locationMap[loc].min = Math.min(locationMap[loc].min, amount);
+        locationMap[loc].max = Math.max(locationMap[loc].max, amount);
+      });
+      
+      const topLocation = Object.entries(locationMap)
+        .sort((a: any, b: any) => b[1].total - a[1].total)[0];
+      const [locName, locData] = topLocation as any;
+      return `The location where you have paid the most toll is ${locName} with a total of $${locData.total.toFixed(2)} across ${locData.count} transactions (range: $${locData.min.toFixed(2)} - $${locData.max.toFixed(2)}).`;
+    }
     else if (queryLower.includes('location') || queryLower.includes('point') || queryLower.includes('where')) {
       const locations = [...new Set(transactions.map((t: any) => t.toll_point_name))];
       return `Your tolling activity has been recorded at these ${locations.length} locations: ${locations.join(', ')}.`;
