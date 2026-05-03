@@ -125,12 +125,22 @@ export class BedrockService {
         const processingTime = Date.now() - startTime;
         const errorMsg = error.message || JSON.stringify(error);
         const statusCode = error.$metadata?.httpStatusCode;
+        const errorCode = error.__type || error.Code || error.name;
+        const errorDetails = error.$metadata || error;
+        
+        // LOG FULL ERROR DETAILS TO DIAGNOSE
+        debugLog(`🔴 ERROR DETAILS (attempt ${retries + 1}/${maxRetries + 1}):`);
+        debugLog(`   HTTP Status: ${statusCode}`);
+        debugLog(`   Error Code: ${errorCode}`);
+        debugLog(`   Error Message: ${errorMsg}`);
+        debugLog(`   Full Error: ${JSON.stringify(error)}`);
         
         // Check if this is a throttling/rate limit error
         const isRateLimited = statusCode === 429 ||
                              errorMsg.includes('Rate exceeded') ||
                              errorMsg.includes('ThrottlingException') ||
-                             errorMsg.includes('request rate');
+                             errorMsg.includes('request rate') ||
+                             errorCode === 'ThrottlingException';
         
         const isTokenLimited = errorMsg.includes('Too many tokens') ||
                               errorMsg.includes('quota') ||
@@ -139,8 +149,7 @@ export class BedrockService {
         // Rate limit: retry aggressively with longer backoff (capped at 15s)
         if (isRateLimited && retries < maxRetries) {
           const waitTime = Math.min(Math.pow(2, retries) * 1000, 15000); // 1s, 2s, 4s, 8s, 15s (capped)
-          debugLog(`⚡ Rate limited (HTTP ${statusCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
-          debugLog(`📝 Error: ${errorMsg}`);
+          debugLog(`⚡ Rate limited (HTTP ${statusCode}, Code: ${errorCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           retries++;
           await new Promise(resolve => setTimeout(resolve, waitTime));
           return attemptInvoke(); // Recursive retry
@@ -149,8 +158,7 @@ export class BedrockService {
         // Token limit: keep retrying with longer backoff (capped at 15s)
         if (isTokenLimited && retries < maxRetries) {
           const waitTime = Math.min(Math.pow(2, retries) * 3000, 15000); // 3s, 6s, 12s, 15s (capped)
-          debugLog(`🎫 Token/quota limit. Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
-          debugLog(`📝 Error: ${errorMsg}`);
+          debugLog(`🎫 Token/quota limit (Code: ${errorCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           retries++;
           await new Promise(resolve => setTimeout(resolve, waitTime));
           return attemptInvoke();
@@ -158,23 +166,21 @@ export class BedrockService {
 
         // Handle specific errors with user-friendly messages
         if (isRateLimited) {
-          debugLog(`❌ Rate limit exceeded after retries`);
+          debugLog(`❌ Rate limit exceeded after retries (HTTP ${statusCode}, Code: ${errorCode})`);
           throw new Error(
-            'Too many requests to AI service. AWS Bedrock rate limit reached. ' +
+            `Too many requests to AI service. AWS Bedrock rate limit reached (${errorCode}). ` +
             'Please wait 30 seconds and try again.'
           );
         }
 
         if (isTokenLimited) {
-          debugLog(`❌ Token/Quota limit reached.`);
+          debugLog(`❌ Token/Quota limit reached (Code: ${errorCode}).`);
           throw new Error(
-            'Too many tokens in your request. Please try with a more specific query. ' +
-            'Try asking about fewer transactions or a specific time period.'
+            `Too many tokens in your request (${errorCode}). Please try with a more specific query.`
           );
         }
 
-        debugLog(`❌ Bedrock error after ${processingTime}ms: ${errorMsg}`);
-        debugLog(`🔍 Full error: ${JSON.stringify(error)}`);
+        debugLog(`❌ Bedrock error after ${processingTime}ms (Code: ${errorCode}): ${errorMsg}`);
         throw error;
       }
     };
@@ -251,12 +257,21 @@ export class BedrockService {
         const processingTime = Date.now() - startTime;
         const errorMsg = error.message || JSON.stringify(error);
         const statusCode = error.$metadata?.httpStatusCode;
+        const errorCode = error.__type || error.Code || error.name;
+        
+        // LOG FULL ERROR DETAILS TO DIAGNOSE
+        debugLog(`🔴 STREAM ERROR DETAILS (attempt ${retries + 1}/${maxRetries + 1}):`);
+        debugLog(`   HTTP Status: ${statusCode}`);
+        debugLog(`   Error Code: ${errorCode}`);
+        debugLog(`   Error Message: ${errorMsg}`);
+        debugLog(`   Full Error: ${JSON.stringify(error)}`);
         
         // Check if this is a rate limit error
         const isRateLimited = statusCode === 429 ||
                              errorMsg.includes('Rate exceeded') ||
                              errorMsg.includes('ThrottlingException') ||
-                             errorMsg.includes('request rate');
+                             errorMsg.includes('request rate') ||
+                             errorCode === 'ThrottlingException';
         
         const isTokenLimited = errorMsg.includes('Too many tokens') ||
                               errorMsg.includes('quota') ||
@@ -265,8 +280,7 @@ export class BedrockService {
         // Rate limit: retry aggressively with longer backoff (capped at 15s)
         if (isRateLimited && retries < maxRetries) {
           const waitTime = Math.min(Math.pow(2, retries) * 2000, 15000); // 2s, 4s, 8s, 15s (capped)
-          debugLog(`⚡ Stream: Rate limited (HTTP ${statusCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
-          debugLog(`📝 Stream error: ${errorMsg}`);
+          debugLog(`⚡ Stream: Rate limited (HTTP ${statusCode}, Code: ${errorCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           retries++;
           await new Promise(resolve => setTimeout(resolve, waitTime));
           return attemptInvoke(); // Recursive retry
@@ -275,8 +289,7 @@ export class BedrockService {
         // Token limit: keep retrying with longer backoff (capped at 15s)
         if (isTokenLimited && retries < maxRetries) {
           const waitTime = Math.min(Math.pow(2, retries) * 3000, 15000); // 3s, 6s, 12s, 15s (capped)
-          debugLog(`🎫 Stream: Token/quota limit. Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
-          debugLog(`📝 Stream error: ${errorMsg}`);
+          debugLog(`🎫 Stream: Token/quota limit (Code: ${errorCode}). Retrying in ${waitTime}ms (attempt ${retries + 1}/${maxRetries})...`);
           retries++;
           await new Promise(resolve => setTimeout(resolve, waitTime));
           return attemptInvoke();
@@ -284,23 +297,21 @@ export class BedrockService {
 
         // Handle specific errors with user-friendly messages
         if (isRateLimited) {
-          debugLog(`❌ Stream: Rate limit exceeded after retries`);
+          debugLog(`❌ Stream: Rate limit exceeded after retries (HTTP ${statusCode}, Code: ${errorCode})`);
           throw new Error(
-            'Too many requests to AI service. AWS Bedrock rate limit reached. ' +
+            `Too many requests to AI service. AWS Bedrock rate limit reached (${errorCode}). ` +
             'Please wait 30 seconds and try again.'
           );
         }
 
         if (isTokenLimited) {
-          debugLog(`❌ Stream: Token/Quota limit reached.`);
+          debugLog(`❌ Stream: Token/Quota limit reached (Code: ${errorCode}).`);
           throw new Error(
-            'Too many tokens in your request. Please try with a more specific query. ' +
-            'Try asking about fewer transactions or a specific time period.'
+            `Too many tokens in your request (${errorCode}). Please try with a more specific query.`
           );
         }
 
-        debugLog(`❌ Stream error after ${processingTime}ms: ${errorMsg}`);
-        debugLog(`🔍 Stream: Full error: ${JSON.stringify(error)}`);
+        debugLog(`❌ Stream error after ${processingTime}ms (Code: ${errorCode}): ${errorMsg}`);
         throw error;
       }
     };
